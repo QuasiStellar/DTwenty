@@ -21,6 +21,7 @@ N = 2
     Huge values can cause lags and Memory Error (N>80) """
 
 
+# TODO: maybe (x, y) is better than (i, j)
 class Game(arcade.Window):
 
     def __init__(self, width, height):
@@ -150,26 +151,25 @@ class Game(arcade.Window):
             self.hints_on = not self.hints_on
             self.hints_notification = False
 
-        i = self.player.i
-        j = self.player.j
-        if symbol == arcade.key.Z:
-            self.player.move(Cell.Cell.near(i, j)[0][0], Cell.Cell.near(i, j)[0][1])
-        if symbol == arcade.key.X:
-            self.player.move(Cell.Cell.near(i, j)[1][0], Cell.Cell.near(i, j)[1][1])
-        if symbol == arcade.key.C:
-            self.player.move(Cell.Cell.near(i, j)[2][0], Cell.Cell.near(i, j)[2][1])
-        if symbol == arcade.key.A:
-            self.player.move(Cell.Cell.near(i, j)[3][0], Cell.Cell.near(i, j)[3][1])
         if symbol == arcade.key.S:
             self.player.coord = not self.player.coord
-        if symbol == arcade.key.D:
-            self.player.move(Cell.Cell.near(i, j)[4][0], Cell.Cell.near(i, j)[4][1])
-        if symbol == arcade.key.Q:
-            self.player.move(Cell.Cell.near(i, j)[5][0], Cell.Cell.near(i, j)[5][1])
-        if symbol == arcade.key.W:
-            self.player.move(Cell.Cell.near(i, j)[6][0], Cell.Cell.near(i, j)[6][1])
-        if symbol == arcade.key.E:
-            self.player.move(Cell.Cell.near(i, j)[7][0], Cell.Cell.near(i, j)[7][1])
+
+        movement_keys = (
+            arcade.key.Z,
+            arcade.key.X,
+            arcade.key.C,
+            arcade.key.A,
+            arcade.key.D,
+            arcade.key.Q,
+            arcade.key.W,
+            arcade.key.E
+        )
+        if symbol in movement_keys:
+            i = self.player.i
+            j = self.player.j
+            direction_index = movement_keys.index(symbol)
+            new_pos = Cell.Cell.near(i, j)[direction_index]
+            self.player.move(*new_pos)
 
     def tectonic_generation(self):
         pass
