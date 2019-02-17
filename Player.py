@@ -17,14 +17,14 @@ class Player(object):
     def draw(self):
         height = 260 / (Game.N * 3)
         width = 300 / (Game.N * 3)
-        arcade.draw_circle_filled(round(width*(self.i/2)),
-                                  round(height*((0.33+0.33*(self.i % 2 == self.j % 2))+self.j)),
+        arcade.draw_circle_filled(round(width * (self.i/2)),
+                                  round(height * ((0.33 + 0.33 * (self.i % 2 == self.j % 2)) + self.j)),
                                   3,
                                   arcade.color.BLACK)
         if self.coord:
-            arcade.draw_text(str(self.i)+' '+str(self.j),
+            arcade.draw_text(str(self.i) + ' ' + str(self.j),
                              round(width*(self.i/2)),
-                             round(height*(0.33*(self.i % 2 == self.j % 2)+self.j)+30),
+                             round(height*(0.33 * (self.i % 2 == self.j % 2) + self.j) + 30),
                              arcade.color.BLACK,
                              17,
                              bold=True,

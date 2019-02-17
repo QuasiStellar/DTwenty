@@ -4,8 +4,9 @@ import timeit
 
 import Player
 import Cell
+import WorldMap
 
-VERSION = "alpha-0.1"
+VERSION = "alpha-0.2"
 
 file_path = os.path.dirname(os.path.abspath(__file__))
 os.chdir(file_path)
@@ -15,10 +16,12 @@ SCREEN_HEIGHT = 780
 
 SCREEN_TITLE = "D20"
 
-N = 2
+N = 8
 """ You can change this constant. It determines an amount of cells on your map (3N cells on one side).
     Remember that quantity is proportional to the square of edge length.
     Huge values can cause lags and Memory Error (N>80) """
+
+world_map = WorldMap.WorldMap()
 
 
 class Game(arcade.Window):
@@ -33,6 +36,8 @@ class Game(arcade.Window):
         self.hints_on = False
         self.hints_notification = True
 
+        self.cell_list = []
+
         self.debug_mod = False
 
         arcade.set_background_color(arcade.color.BLACK)
@@ -40,6 +45,39 @@ class Game(arcade.Window):
     def setup(self):
         self.borders = arcade.ShapeElementList()
         self.cells = arcade.ShapeElementList()
+
+        color_list = []
+
+        height = 260 / (N * 3)
+        width = 300 / (N * 3)
+
+        for horizontal in world_map.map:
+            for cell in horizontal:
+                if cell.exist:
+                    if cell.up_side_down:
+                        left_up = (round(((cell.i - 1) // 2 + 0.5) * width) - round(width * 0.5 * (cell.j % 2 == 1)),
+                                   round((cell.j + 1) * height))
+                        right_up = (round(((cell.i - 1) // 2 + 1.5) * width) - round(width * 0.5 * (cell.j % 2 == 1)),
+                                    round((cell.j + 1) * height))
+                        bottom = (round(((cell.i - 1) // 2 + 1) * width) - round(width * 0.5 * (cell.j % 2 == 1)),
+                                  round(cell.j * height))
+                        self.cell_list.append(left_up)
+                        self.cell_list.append(right_up)
+                        self.cell_list.append(bottom)
+                        for i in range(3):
+                            color_list.append(cell.color)
+                    else:
+                        left_down = (round(cell.i // 2 * width) - round(0.5 * width * (cell.j % 2 == 1)),
+                                     round(cell.j * height))
+                        right_down = (round((cell.i // 2 + 1) * width) - round(0.5 * width * (cell.j % 2 == 1)),
+                                      round(cell.j * height))
+                        top = (round((cell.i // 2 + 0.5) * width) - round(0.5 * width * (cell.j % 2 == 1)),
+                               round((cell.j + 1) * height))
+                        self.cell_list.append(left_down)
+                        self.cell_list.append(right_down)
+                        self.cell_list.append(top)
+                        for i in range(3):
+                            color_list.append(cell.color)
 
         point_list_1 = ((0, 520),
                         (150, 780),
@@ -64,49 +102,27 @@ class Game(arcade.Window):
                         (150, 260),
                         (0, 0))
 
-        cell_list = []
-        color_list = []
-
-        height = 260 / (N * 3)
-        width = 300 / (N * 3)
-
-        world_map = [[Cell.Cell(i, j) for j in range(9 * N)] for i in range(30 * N)]
-
-        for horizontal in world_map:
-            for cell in horizontal:
-                if cell.exist:
-                    if cell.up_side_down:
-                        left_up = (round(((cell.i - 1) // 2 + 0.5) * width) - round(width * 0.5 * (cell.j % 2 == 1)),
-                                   round((cell.j + 1) * height))
-                        right_up = (round(((cell.i - 1) // 2 + 1.5) * width) - round(width * 0.5 * (cell.j % 2 == 1)),
-                                    round((cell.j + 1) * height))
-                        bottom = (round(((cell.i - 1) // 2 + 1) * width) - round(width * 0.5 * (cell.j % 2 == 1)),
-                                  round(cell.j * height))
-                        cell_list.append(left_up)
-                        cell_list.append(right_up)
-                        cell_list.append(bottom)
-                        for i in range(3):
-                            color_list.append(cell.color)
-
-                    else:
-                        left_down = (round(cell.i // 2 * width) - round(0.5 * width * (cell.j % 2 == 1)),
-                                     round(cell.j * height))
-                        right_down = (round((cell.i // 2 + 1) * width) - round(0.5 * width * (cell.j % 2 == 1)),
-                                      round(cell.j * height))
-                        top = (round((cell.i // 2 + 0.5) * width) - round(0.5 * width * (cell.j % 2 == 1)),
-                               round((cell.j + 1) * height))
-                        cell_list.append(left_down)
-                        cell_list.append(right_down)
-                        cell_list.append(top)
-                        for i in range(3):
-                            color_list.append(cell.color)
-
         border_1 = arcade.create_line_strip(point_list_1, arcade.color.WHITE, 2)
         border_2 = arcade.create_line_strip(point_list_2, arcade.color.WHITE, 2)
-        cells_grid = arcade.create_triangles_filled_with_colors(cell_list, color_list)
+        cells_grid = arcade.create_triangles_filled_with_colors(self.cell_list, color_list)
 
         self.borders.append(border_1)
         self.borders.append(border_2)
+        self.cells.append(cells_grid)
+
+    def re_setup(self):
+        self.cells = arcade.ShapeElementList()
+
+        color_list = []
+
+        for horizontal in world_map.map:
+            for cell in horizontal:
+                if cell.exist:
+                    for i in range(3):
+                        color_list.append(cell.color)
+
+        cells_grid = arcade.create_triangles_filled_with_colors(self.cell_list, color_list)
+
         self.cells.append(cells_grid)
 
     def on_draw(self):
@@ -149,6 +165,10 @@ class Game(arcade.Window):
         if symbol == arcade.key.H:
             self.hints_on = not self.hints_on
             self.hints_notification = False
+
+        if symbol == arcade.key.T:
+            world_map.tectonic(5)
+            self.re_setup()
 
         i = self.player.i
         j = self.player.j
@@ -207,6 +227,9 @@ class Game(arcade.Window):
                          arcade.color.WHITE, 20, width=200, bold=True,
                          align="center", font_name=('Century Gothic', 'Arial'), anchor_x="center", anchor_y="center")
         arcade.draw_text("Debug Mod: F3", SCREEN_WIDTH / 2 - 440, SCREEN_HEIGHT / 2 - 100,
+                         arcade.color.WHITE, 20, width=200, bold=True,
+                         align="center", font_name=('Century Gothic', 'Arial'), anchor_x="center", anchor_y="center")
+        arcade.draw_text("Tectonic test: T", SCREEN_WIDTH / 2 - 440, SCREEN_HEIGHT / 2 - 200,
                          arcade.color.WHITE, 20, width=200, bold=True,
                          align="center", font_name=('Century Gothic', 'Arial'), anchor_x="center", anchor_y="center")
 
