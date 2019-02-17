@@ -5,8 +5,9 @@ from itertools import chain
 
 import Player
 import Cell
+import WorldMap
 
-VERSION = "alpha-0.1"
+VERSION = "alpha-0.2"
 
 file_path = os.path.dirname(os.path.abspath(__file__))
 os.chdir(file_path)
@@ -16,10 +17,12 @@ SCREEN_HEIGHT = 780
 
 SCREEN_TITLE = "D20"
 
-N = 2
+N = 8
 """ You can change this constant. It determines an amount of cells on your map (3N cells on one side).
     Remember that quantity is proportional to the square of edge length.
     Huge values can cause lags and Memory Error (N>80) """
+
+world_map = WorldMap.WorldMap()
 
 
 class Game(arcade.Window):
@@ -33,6 +36,8 @@ class Game(arcade.Window):
         self.draw_time = 0
         self.hints_on = False
         self.hints_notification = True
+
+        self.cell_list = []
 
         self.debug_mod = False
 
@@ -68,22 +73,21 @@ class Game(arcade.Window):
         self.borders.append(border_2)
 
         self.cells = arcade.ShapeElementList()
-        cell_list = []
         color_list = []
 
         height = 260 / (N * 3)
         width = 300 / (N * 3)
 
-        world_map = [[Cell.Cell(x, y) for y in range(9 * N)] for x in range(30 * N)]
-        cells = chain(*world_map)
+        cells = chain(*world_map.map)
         cells = filter(lambda cell: cell.exist, cells)
 
         for cell in cells:
             triangle = self._get_triangle_vertices(cell, width, height)
-            cell_list.extend(triangle)
+            for vertex in triangle:
+                self.cell_list.append(vertex)
             color_list.extend(3*[cell.color])
 
-        cells_grid = arcade.create_triangles_filled_with_colors(cell_list, color_list)
+        cells_grid = arcade.create_triangles_filled_with_colors(self.cell_list, color_list)
         self.cells.append(cells_grid)
 
     @staticmethod
@@ -111,6 +115,20 @@ class Game(arcade.Window):
             vertex = map(round, vertex)
             triangle[vertex_index] = tuple(vertex)
         return tuple(triangle)
+
+    def re_setup(self):
+        self.cells = arcade.ShapeElementList()
+
+        color_list = []
+
+        cells = chain(*world_map.map)
+        cells = filter(lambda cell: cell.exist, cells)
+        for cell in cells:
+            color = 3*[cell.color]
+            color_list.extend(color)
+
+        cells_grid = arcade.create_triangles_filled_with_colors(self.cell_list, color_list)
+        self.cells.append(cells_grid)
 
     def on_draw(self):
 
@@ -152,6 +170,10 @@ class Game(arcade.Window):
         if symbol == arcade.key.H:
             self.hints_on = not self.hints_on
             self.hints_notification = False
+
+        if symbol == arcade.key.T:
+            world_map.tectonic(5)
+            self.re_setup()
 
         if symbol == arcade.key.S:
             self.player.coord = not self.player.coord
@@ -211,6 +233,9 @@ class Game(arcade.Window):
         arcade.draw_text("Debug Mod: F3", SCREEN_WIDTH / 2 - 440, SCREEN_HEIGHT / 2 - 100,
                          arcade.color.WHITE, 20, width=200, bold=True,
                          align="center", font_name=('Century Gothic', 'Arial'), anchor_x="center", anchor_y="center")
+        arcade.draw_text("Tectonic test: T", SCREEN_WIDTH / 2 - 440, SCREEN_HEIGHT / 2 - 200,
+                         arcade.color.WHITE, 20, width=200, bold=True,
+                         align="center", font_name=('Century Gothic', 'Arial'), anchor_x="center", anchor_y="center")
 
 
 def main():
@@ -220,4 +245,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main() 
+    main()

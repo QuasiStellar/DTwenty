@@ -1,6 +1,7 @@
 import random
 
 import Game
+import WorldMap
 
 
 class Cell(object):
@@ -13,6 +14,7 @@ class Cell(object):
         self.type = 0
         self.temperature = 0
         self.height = 0
+        self.plate = None
 
         random_color = random.randint(128, 256)
         self.color = (random_color, random_color, random_color)
@@ -34,6 +36,15 @@ class Cell(object):
             else:
                 if 6*Game.N-xx <= yy:
                     self.exist = False
+
+    @staticmethod
+    def random_cell():
+        while True:
+            i = random.randint(0, 30 * Game.N - 1)
+            j = random.randint(0, 9 * Game.N - 1)
+            if Game.world_map.map[i][j].exist:
+                random_cell = (i, j)
+                return random_cell
 
     @staticmethod
     def near(x, y):
