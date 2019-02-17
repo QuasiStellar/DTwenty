@@ -1,6 +1,7 @@
 import arcade
 import os
 import timeit
+from itertools import chain
 
 import Player
 import Cell
@@ -40,8 +41,6 @@ class Game(arcade.Window):
 
     def setup(self):
         self.borders = arcade.ShapeElementList()
-        self.cells = arcade.ShapeElementList()
-
         point_list_1 = ((0, 520),
                         (150, 780),
                         (300, 520),
@@ -64,7 +63,12 @@ class Game(arcade.Window):
                         (300, 0),
                         (150, 260),
                         (0, 0))
+        border_1 = arcade.create_line_strip(point_list_1, arcade.color.WHITE, 2)
+        border_2 = arcade.create_line_strip(point_list_2, arcade.color.WHITE, 2)
+        self.borders.append(border_1)
+        self.borders.append(border_2)
 
+        self.cells = arcade.ShapeElementList()
         cell_list = []
         color_list = []
 
@@ -72,43 +76,42 @@ class Game(arcade.Window):
         width = 300 / (N * 3)
 
         world_map = [[Cell.Cell(i, j) for j in range(9 * N)] for i in range(30 * N)]
+        cells = chain(*world_map)
+        cells = filter(lambda cell: cell.exist, cells)
 
-        for horizontal in world_map:
-            for cell in horizontal:
-                if cell.exist:
-                    if cell.up_side_down:
-                        left_up = (round(((cell.i - 1) // 2 + 0.5) * width) - round(width * 0.5 * (cell.j % 2 == 1)),
-                                   round((cell.j + 1) * height))
-                        right_up = (round(((cell.i - 1) // 2 + 1.5) * width) - round(width * 0.5 * (cell.j % 2 == 1)),
-                                    round((cell.j + 1) * height))
-                        bottom = (round(((cell.i - 1) // 2 + 1) * width) - round(width * 0.5 * (cell.j % 2 == 1)),
-                                  round(cell.j * height))
-                        cell_list.append(left_up)
-                        cell_list.append(right_up)
-                        cell_list.append(bottom)
-                        for i in range(3):
-                            color_list.append(cell.color)
+        for cell in cells:
+            triangle = self._get_triangle_vertices(cell, width, height)
+            cell_list.extend(triangle)
+            color_list.extend(3*[cell.color])
 
-                    else:
-                        left_down = (round(cell.i // 2 * width) - round(0.5 * width * (cell.j % 2 == 1)),
-                                     round(cell.j * height))
-                        right_down = (round((cell.i // 2 + 1) * width) - round(0.5 * width * (cell.j % 2 == 1)),
-                                      round(cell.j * height))
-                        top = (round((cell.i // 2 + 0.5) * width) - round(0.5 * width * (cell.j % 2 == 1)),
-                               round((cell.j + 1) * height))
-                        cell_list.append(left_down)
-                        cell_list.append(right_down)
-                        cell_list.append(top)
-                        for i in range(3):
-                            color_list.append(cell.color)
-
-        border_1 = arcade.create_line_strip(point_list_1, arcade.color.WHITE, 2)
-        border_2 = arcade.create_line_strip(point_list_2, arcade.color.WHITE, 2)
         cells_grid = arcade.create_triangles_filled_with_colors(cell_list, color_list)
-
-        self.borders.append(border_1)
-        self.borders.append(border_2)
         self.cells.append(cells_grid)
+
+    @staticmethod
+    def _get_triangle_vertices(cell, width, height):
+        down_j = cell.j
+        up_j = cell.j + 1
+        if cell.up_side_down:
+            left_i = (cell.i - 1) // 2 + 0.5
+        else:
+            left_i = cell.i // 2
+        if cell.j % 2 == 1:
+            left_i -= 0.5
+        middle_i = left_i + 0.5
+        right_i = left_i + 1
+        vertices_i = (left_i, right_i, middle_i)
+        if cell.up_side_down:
+            vertices_j = (up_j, up_j, down_j)
+        else:
+            vertices_j = (down_j, down_j, up_j)
+        triangle = zip(vertices_i, vertices_j)
+        triangle = list(triangle)
+        for vertex_index, vertex in enumerate(tuple(triangle)):
+            i, j = vertex
+            vertex = (i*width, j*height)
+            vertex = map(round, vertex)
+            triangle[vertex_index] = tuple(vertex)
+        return tuple(triangle)
 
     def on_draw(self):
 
