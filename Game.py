@@ -22,7 +22,6 @@ N = 2
     Huge values can cause lags and Memory Error (N>80) """
 
 
-# TODO: maybe (x, y) is better than (i, j)
 class Game(arcade.Window):
 
     def __init__(self, width, height):
@@ -75,7 +74,7 @@ class Game(arcade.Window):
         height = 260 / (N * 3)
         width = 300 / (N * 3)
 
-        world_map = [[Cell.Cell(i, j) for j in range(9 * N)] for i in range(30 * N)]
+        world_map = [[Cell.Cell(x, y) for y in range(9 * N)] for x in range(30 * N)]
         cells = chain(*world_map)
         cells = filter(lambda cell: cell.exist, cells)
 
@@ -89,26 +88,26 @@ class Game(arcade.Window):
 
     @staticmethod
     def _get_triangle_vertices(cell, width, height):
-        down_j = cell.j
-        up_j = cell.j + 1
+        down_y = cell.y
+        up_y = cell.y + 1
         if cell.up_side_down:
-            left_i = (cell.i - 1) // 2 + 0.5
+            left_x = (cell.x - 1) // 2 + 0.5
         else:
-            left_i = cell.i // 2
-        if cell.j % 2 == 1:
-            left_i -= 0.5
-        middle_i = left_i + 0.5
-        right_i = left_i + 1
-        vertices_i = (left_i, right_i, middle_i)
+            left_x = cell.x // 2
+        if cell.y % 2 == 1:
+            left_x -= 0.5
+        middle_x = left_x + 0.5
+        right_x = left_x + 1
+        vertices_x = (left_x, right_x, middle_x)
         if cell.up_side_down:
-            vertices_j = (up_j, up_j, down_j)
+            vertices_y = (up_y, up_y, down_y)
         else:
-            vertices_j = (down_j, down_j, up_j)
-        triangle = zip(vertices_i, vertices_j)
+            vertices_y = (down_y, down_y, up_y)
+        triangle = zip(vertices_x, vertices_y)
         triangle = list(triangle)
         for vertex_index, vertex in enumerate(tuple(triangle)):
-            i, j = vertex
-            vertex = (i*width, j*height)
+            x, y = vertex
+            vertex = (x*width, y*height)
             vertex = map(round, vertex)
             triangle[vertex_index] = tuple(vertex)
         return tuple(triangle)
@@ -168,10 +167,10 @@ class Game(arcade.Window):
             arcade.key.E
         )
         if symbol in movement_keys:
-            i = self.player.i
-            j = self.player.j
+            x = self.player.x
+            y = self.player.y
             direction_index = movement_keys.index(symbol)
-            new_pos = Cell.Cell.near(i, j)[direction_index]
+            new_pos = Cell.Cell.near(x, y)[direction_index]
             self.player.move(*new_pos)
 
     def tectonic_generation(self):
