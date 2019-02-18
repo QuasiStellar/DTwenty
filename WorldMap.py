@@ -11,10 +11,33 @@ OVERGROWTH_FACTOR = 0.5
 class WorldMap(object):
 
     def __init__(self):
-        self._map = [[Cell.Cell(x, y) for y in range(9 * Game.N)] for x in range(30 * Game.N)]
-        cells = itertools.chain(*self._map)  # join horizontals
-        cells = filter(lambda c: c.exist, cells)
+        create_cell = lambda x, y: Cell.Cell(x, y) if self._pos_exists((x, y)) else None
+        self._map = [[create_cell(x, y) for y in range(9 * Game.N)] for x in range(30 * Game.N)]
+        cells = itertools.chain(*self._map)  # join columns
+        cells = filter(lambda c: c is not None, cells)
         self.cells = tuple(cells)
+
+    @staticmethod
+    def _pos_exists(pos):
+        x, y = pos
+        if y < 3*Game.N:
+            xx = x % (6 * Game.N)
+            if xx <= 3*Game.N:
+                if xx > y:
+                    return False
+            else:
+                if 6*Game.N-xx > y:
+                    return False
+        elif y >= 6*Game.N:
+            xx = x % (6 * Game.N)
+            yy = y % (6 * Game.N)
+            if xx <= 3*Game.N:
+                if xx <= yy:
+                    return False
+            else:
+                if 6*Game.N-xx <= yy:
+                    return False
+        return True
 
     @staticmethod
     def near_cells(coord):
