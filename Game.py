@@ -1,7 +1,6 @@
 import arcade
 import os
 import timeit
-from itertools import chain
 
 import Player
 import Cell
@@ -80,10 +79,7 @@ class Game(arcade.Window):
         cell_height = 260 / (N * 3)
         cell_width = 300 / (N * 3)
 
-        cells = chain(*world_map.map)  # join horizontals
-        cells = filter(lambda c: c.exist, cells)
-
-        for cell in cells:
+        for cell in world_map.cells:
             triangle = self._get_triangle_vertices(cell, cell_width, cell_height)
             for vertex in triangle:
                 self.cell_list.append(vertex)
@@ -123,9 +119,7 @@ class Game(arcade.Window):
 
         color_list = []
 
-        cells = chain(*world_map.map)
-        cells = filter(lambda c: c.exist, cells)
-        for cell in cells:
+        for cell in world_map.cells:
             color = 3*[cell.color]
             color_list.extend(color)
 
