@@ -1,6 +1,7 @@
 import arcade
 import os
 import timeit
+from itertools import chain
 
 import Player
 import Cell
@@ -44,41 +45,6 @@ class Game(arcade.Window):
 
     def setup(self):
         self.borders = arcade.ShapeElementList()
-        self.cells = arcade.ShapeElementList()
-
-        color_list = []
-
-        height = 260 / (N * 3)
-        width = 300 / (N * 3)
-
-        for horizontal in world_map.map:
-            for cell in horizontal:
-                if cell.exist:
-                    if cell.up_side_down:
-                        left_up = (round(((cell.i - 1) // 2 + 0.5) * width) - round(width * 0.5 * (cell.j % 2 == 1)),
-                                   round((cell.j + 1) * height))
-                        right_up = (round(((cell.i - 1) // 2 + 1.5) * width) - round(width * 0.5 * (cell.j % 2 == 1)),
-                                    round((cell.j + 1) * height))
-                        bottom = (round(((cell.i - 1) // 2 + 1) * width) - round(width * 0.5 * (cell.j % 2 == 1)),
-                                  round(cell.j * height))
-                        self.cell_list.append(left_up)
-                        self.cell_list.append(right_up)
-                        self.cell_list.append(bottom)
-                        for i in range(3):
-                            color_list.append(cell.color)
-                    else:
-                        left_down = (round(cell.i // 2 * width) - round(0.5 * width * (cell.j % 2 == 1)),
-                                     round(cell.j * height))
-                        right_down = (round((cell.i // 2 + 1) * width) - round(0.5 * width * (cell.j % 2 == 1)),
-                                      round(cell.j * height))
-                        top = (round((cell.i // 2 + 0.5) * width) - round(0.5 * width * (cell.j % 2 == 1)),
-                               round((cell.j + 1) * height))
-                        self.cell_list.append(left_down)
-                        self.cell_list.append(right_down)
-                        self.cell_list.append(top)
-                        for i in range(3):
-                            color_list.append(cell.color)
-
         point_list_1 = ((0, 520),
                         (150, 780),
                         (300, 520),
@@ -101,28 +67,67 @@ class Game(arcade.Window):
                         (300, 0),
                         (150, 260),
                         (0, 0))
-
         border_1 = arcade.create_line_strip(point_list_1, arcade.color.WHITE, 2)
         border_2 = arcade.create_line_strip(point_list_2, arcade.color.WHITE, 2)
-        cells_grid = arcade.create_triangles_filled_with_colors(self.cell_list, color_list)
-
         self.borders.append(border_1)
         self.borders.append(border_2)
+
+        self.cells = arcade.ShapeElementList()
+        color_list = []
+
+        height = 260 / (N * 3)
+        width = 300 / (N * 3)
+
+        cells = chain(*world_map.map)
+        cells = filter(lambda cell: cell.exist, cells)
+
+        for cell in cells:
+            triangle = self._get_triangle_vertices(cell, width, height)
+            for vertex in triangle:
+                self.cell_list.append(vertex)
+            color_list.extend(3*[cell.color])
+
+        cells_grid = arcade.create_triangles_filled_with_colors(self.cell_list, color_list)
         self.cells.append(cells_grid)
+
+    @staticmethod
+    def _get_triangle_vertices(cell, width, height):
+        down_y = cell.y
+        up_y = cell.y + 1
+        if cell.up_side_down:
+            left_x = (cell.x - 1) // 2 + 0.5
+        else:
+            left_x = cell.x // 2
+        if cell.y % 2 == 1:
+            left_x -= 0.5
+        middle_x = left_x + 0.5
+        right_x = left_x + 1
+        vertices_x = (left_x, right_x, middle_x)
+        if cell.up_side_down:
+            vertices_y = (up_y, up_y, down_y)
+        else:
+            vertices_y = (down_y, down_y, up_y)
+        triangle = zip(vertices_x, vertices_y)
+        triangle = list(triangle)
+        for vertex_index, vertex in enumerate(tuple(triangle)):
+            x, y = vertex
+            vertex = (x*width, y*height)
+            vertex = map(round, vertex)
+            triangle[vertex_index] = tuple(vertex)
+        return tuple(triangle)
 
     def re_setup(self):
         self.cells = arcade.ShapeElementList()
 
         color_list = []
 
-        for horizontal in world_map.map:
-            for cell in horizontal:
-                if cell.exist:
-                    for i in range(3):
-                        color_list.append(cell.color)
+        cells = chain(*world_map.map)
+        cells = filter(lambda cell: cell.exist, cells)
+        for cell in cells:
+            color = 3*[cell.color]
+            color_list.extend(color)
 
         cells_grid = arcade.create_triangles_filled_with_colors(self.cell_list, color_list)
-
         self.cells.append(cells_grid)
 
     def on_draw(self):
@@ -170,26 +175,25 @@ class Game(arcade.Window):
             world_map.tectonic(5)
             self.re_setup()
 
-        i = self.player.i
-        j = self.player.j
-        if symbol == arcade.key.Z:
-            self.player.move(Cell.Cell.near(i, j)[0][0], Cell.Cell.near(i, j)[0][1])
-        if symbol == arcade.key.X:
-            self.player.move(Cell.Cell.near(i, j)[1][0], Cell.Cell.near(i, j)[1][1])
-        if symbol == arcade.key.C:
-            self.player.move(Cell.Cell.near(i, j)[2][0], Cell.Cell.near(i, j)[2][1])
-        if symbol == arcade.key.A:
-            self.player.move(Cell.Cell.near(i, j)[3][0], Cell.Cell.near(i, j)[3][1])
         if symbol == arcade.key.S:
             self.player.coord = not self.player.coord
-        if symbol == arcade.key.D:
-            self.player.move(Cell.Cell.near(i, j)[4][0], Cell.Cell.near(i, j)[4][1])
-        if symbol == arcade.key.Q:
-            self.player.move(Cell.Cell.near(i, j)[5][0], Cell.Cell.near(i, j)[5][1])
-        if symbol == arcade.key.W:
-            self.player.move(Cell.Cell.near(i, j)[6][0], Cell.Cell.near(i, j)[6][1])
-        if symbol == arcade.key.E:
-            self.player.move(Cell.Cell.near(i, j)[7][0], Cell.Cell.near(i, j)[7][1])
+
+        movement_keys = (
+            arcade.key.Z,
+            arcade.key.X,
+            arcade.key.C,
+            arcade.key.A,
+            arcade.key.D,
+            arcade.key.Q,
+            arcade.key.W,
+            arcade.key.E
+        )
+        if symbol in movement_keys:
+            x = self.player.x
+            y = self.player.y
+            direction_index = movement_keys.index(symbol)
+            new_pos = Cell.Cell.near(x, y)[direction_index]
+            self.player.move(*new_pos)
 
     def tectonic_generation(self):
         pass
@@ -241,4 +245,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main() 
+    main()
