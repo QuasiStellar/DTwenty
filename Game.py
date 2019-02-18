@@ -17,7 +17,9 @@ SCREEN_HEIGHT = 780
 
 SCREEN_TITLE = "D20"
 
-N = 8
+TECTONIC_PLATES = 5
+
+N = 2
 """ You can change this constant. It determines an amount of cells on your map (3N cells on one side).
     Remember that quantity is proportional to the square of edge length.
     Huge values can cause lags and Memory Error (N>80) """
@@ -79,7 +81,7 @@ class Game(arcade.Window):
         width = 300 / (N * 3)
 
         cells = chain(*world_map.map)
-        cells = filter(lambda cell: cell.exist, cells)
+        cells = filter(lambda c: c.exist, cells)
 
         for cell in cells:
             triangle = self._get_triangle_vertices(cell, width, height)
@@ -122,7 +124,7 @@ class Game(arcade.Window):
         color_list = []
 
         cells = chain(*world_map.map)
-        cells = filter(lambda cell: cell.exist, cells)
+        cells = filter(lambda c: c.exist, cells)
         for cell in cells:
             color = 3*[cell.color]
             color_list.extend(color)
@@ -172,7 +174,7 @@ class Game(arcade.Window):
             self.hints_notification = False
 
         if symbol == arcade.key.T:
-            world_map.tectonic(5)
+            world_map.tectonic(TECTONIC_PLATES)
             self.re_setup()
 
         if symbol == arcade.key.S:
@@ -194,9 +196,6 @@ class Game(arcade.Window):
             direction_index = movement_keys.index(symbol)
             new_pos = Cell.Cell.near(x, y)[direction_index]
             self.player.move(*new_pos)
-
-    def tectonic_generation(self):
-        pass
 
     @staticmethod
     def draw_hints_window():
