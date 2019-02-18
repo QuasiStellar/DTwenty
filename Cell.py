@@ -14,7 +14,7 @@ class Cell(object):
         self.type = 0
         self.temperature = 0
         self.height = 0
-        self.plate = None
+        self.plate = 0
 
         random_color = random.randint(128, 256)
         self.color = (random_color, random_color, random_color)
