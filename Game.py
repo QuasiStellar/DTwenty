@@ -188,7 +188,7 @@ class Game(arcade.Window):
             x = self.player.x
             y = self.player.y
             direction_index = movement_keys.index(symbol)
-            direction = Cell.Cell.near(x, y)[direction_index]
+            direction = world_map.get_directions(x, y)[direction_index]
             self.player.move(*direction)
 
     @staticmethod

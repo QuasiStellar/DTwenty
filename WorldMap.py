@@ -40,8 +40,71 @@ class WorldMap(object):
         return True
 
     @staticmethod
+    def get_directions(x, y):
+        xx = x % (6 * Game.N)
+        yy = y % (6 * Game.N)
+        if (x + y) % 2 == 0:
+            if y == 0:
+                return [(-6*Game.N, 0),
+                        (0, 0),
+                        (6*Game.N, 0),
+                        (-6*Game.N, 0),
+                        (6*Game.N, 0),
+                        (0, 1),
+                        (0, 1),
+                        (0, 1)]
+            if xx == yy and y < 3*Game.N:
+                return [(-1, 0),
+                        (0, 0),
+                        (2*(3*Game.N-yy), 0),
+                        (-1, 0),
+                        (2*(3*Game.N-yy), 0),
+                        (0, 1),
+                        (0, 1),
+                        (0, 1)]
+            if (6*Game.N - xx) == yy and y < 3*Game.N:
+                return [(-2*(3*Game.N-yy), 0),
+                        (0, 0),
+                        (1, 0),
+                        (-2*(3*Game.N-yy), 0),
+                        (1, 0),
+                        (0, 1),
+                        (0, 1),
+                        (0, 1)]
+            return [(-1, 0), (0, 0), (1, 0), (-1, 0), (1, 0), (0, 1), (0, 1), (0, 1)]
+        else:
+            if y == 9*Game.N-1:
+                return [(0, -1),
+                        (0, -1),
+                        (0, -1),
+                        (-6*Game.N, 0),
+                        (6*Game.N, 0),
+                        (-6*Game.N, 0),
+                        (0, 0),
+                        (6*Game.N, 0)]
+            if xx-1 == yy and y >= 6*Game.N:
+                return [(0, -1),
+                        (0, -1),
+                        (0, -1),
+                        (-2*(yy+1), 0),
+                        (1, 0),
+                        (-2*(yy+1), 0),
+                        (0, 0),
+                        (1, 0)]
+            if (6*Game.N - xx - 1) == yy and y >= 6*Game.N:
+                return [(0, -1),
+                        (0, -1),
+                        (0, -1),
+                        (-1, 0),
+                        (2*(yy+1), 0),
+                        (-1, 0),
+                        (0, 0),
+                        (2*(yy+1), 0)]
+            return [(0, -1), (0, -1), (0, -1), (-1, 0), (1, 0), (-1, 0), (0, 0), (1, 0)]
+
+    @staticmethod
     def near_cells(coord):
-        near = Cell.Cell.near(coord[0], coord[1])
+        near = WorldMap.get_directions(coord[0], coord[1])
         near_cells = map(lambda i: Game.world_map.map[coord[0]+near[i][0]][coord[1]+near[i][1]], (i for i in range(8)))
         return near_cells
 
