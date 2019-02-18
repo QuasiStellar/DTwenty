@@ -75,14 +75,14 @@ class Game(arcade.Window):
         self.cells = arcade.ShapeElementList()
         color_list = []
 
-        height = 260 / (N * 3)
-        width = 300 / (N * 3)
+        cell_height = 260 / (N * 3)
+        cell_width = 300 / (N * 3)
 
-        cells = chain(*world_map.map)
+        cells = chain(*world_map.map)  # join horizontals
         cells = filter(lambda cell: cell.exist, cells)
 
         for cell in cells:
-            triangle = self._get_triangle_vertices(cell, width, height)
+            triangle = self._get_triangle_vertices(cell, cell_width, cell_height)
             for vertex in triangle:
                 self.cell_list.append(vertex)
             color_list.extend(3*[cell.color])
@@ -91,7 +91,7 @@ class Game(arcade.Window):
         self.cells.append(cells_grid)
 
     @staticmethod
-    def _get_triangle_vertices(cell, width, height):
+    def _get_triangle_vertices(cell, cell_width, cell_height):
         down_y = cell.y
         up_y = cell.y + 1
         if cell.up_side_down:
@@ -111,7 +111,7 @@ class Game(arcade.Window):
         triangle = list(triangle)
         for vertex_index, vertex in enumerate(tuple(triangle)):
             x, y = vertex
-            vertex = (x*width, y*height)
+            vertex = (x * cell_width, y * cell_height)
             vertex = map(round, vertex)
             triangle[vertex_index] = tuple(vertex)
         return tuple(triangle)
@@ -192,8 +192,8 @@ class Game(arcade.Window):
             x = self.player.x
             y = self.player.y
             direction_index = movement_keys.index(symbol)
-            new_pos = Cell.Cell.near(x, y)[direction_index]
-            self.player.move(*new_pos)
+            direction = Cell.Cell.near(x, y)[direction_index]
+            self.player.move(*direction)
 
     def tectonic_generation(self):
         pass
