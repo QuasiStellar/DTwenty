@@ -109,7 +109,7 @@ class WorldMap(object):
         return near_cells
 
     def tectonic(self, plate_count):
-        cells = set()
+        positions = set()
         plates = []
         plate_centers = random.sample(self.cells, plate_count)
         plate_centers = map(lambda c: (c.x, c.y), plate_centers)
@@ -119,18 +119,21 @@ class WorldMap(object):
             plate_set = set()
             plate_set.add(plate_center)
             plates.append(set(plate_set))
-            cells.add(plate_center)
+            positions.add(plate_center)
             x, y = plate_center
             self._map[x][y].plate = num
             self._map[x][y].color = arcade.color.RED
             num += 1
-        while len(cells) != 180 * Game.N ** 2:
-            for cell in cells:
-                for near_cell in self.near_cells(cell):
-                    if near_cell not in cells:
+        while len(positions) != 180 * Game.N ** 2:
+            for pos in tuple(positions):
+                cell_itself = Game.world_map._map[pos[0]][pos[1]]
+                plate = cell_itself.plate
+                for near_cell in self.near_cells(pos):
+                    near_pos = (near_cell.x, near_cell.y)
+                    if near_pos not in positions:
                         if random.random() < OVERGROWTH_FACTOR:
-                            cells.add(near_cell)
-                            cell_itself = Game.world_map.map[cell[0]][cell[1]]
-                            plates[cell_itself.plate].add(near_cell)
-                            self._map[near_cell.x][near_cell.y].plate = cell_itself.plate
-                            self._map[near_cell.x][near_cell.y].color = arcade.color.BLUE
+                            positions.add(near_pos)
+                            plates[plate].add(near_pos)
+                            x, y = near_pos
+                            self._map[x][y].plate = plate
+                            self._map[x][y].color = arcade.color.BLUE
