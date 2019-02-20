@@ -216,22 +216,22 @@ class Game(arcade.Window):
             y = self.player.y
             if (x + y) % 2 == 0:
                 directions_by_key = (world_map.get_directions(x, y)[0],
+                                     (0, 0),
+                                     world_map.get_directions(x, y)[1],
+                                     world_map.get_directions(x, y)[0],
                                      world_map.get_directions(x, y)[1],
                                      world_map.get_directions(x, y)[2],
-                                     world_map.get_directions(x, y)[0],
                                      world_map.get_directions(x, y)[2],
-                                     world_map.get_directions(x, y)[3],
-                                     world_map.get_directions(x, y)[3],
-                                     world_map.get_directions(x, y)[3])
-            else:
-                directions_by_key = (world_map.get_directions(x, y)[3],
-                                     world_map.get_directions(x, y)[3],
-                                     world_map.get_directions(x, y)[3],
-                                     world_map.get_directions(x, y)[0],
-                                     world_map.get_directions(x, y)[2],
-                                     world_map.get_directions(x, y)[0],
-                                     world_map.get_directions(x, y)[1],
                                      world_map.get_directions(x, y)[2])
+            else:
+                directions_by_key = (world_map.get_directions(x, y)[2],
+                                     world_map.get_directions(x, y)[2],
+                                     world_map.get_directions(x, y)[2],
+                                     world_map.get_directions(x, y)[0],
+                                     world_map.get_directions(x, y)[1],
+                                     world_map.get_directions(x, y)[0],
+                                     (0, 0),
+                                     world_map.get_directions(x, y)[1])
             direction_index = movement_keys.index(symbol)
             direction = directions_by_key[direction_index]
             self.player.move(*direction)

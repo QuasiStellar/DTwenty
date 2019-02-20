@@ -56,37 +56,31 @@ class WorldMap:
         if (x + y) % 2 == 0:
             if y == 0:
                 return [(-6*N, 0),
-                        (0, 0),
                         (6*N, 0),
                         (0, 1)]
             if xx == yy and y < 3*N:
                 return [(-1, 0),
-                        (0, 0),
                         (2*(3*N-yy), 0),
                         (0, 1)]
             if (6*N - xx) == yy and y < 3*N:
                 return [(-2*(3*N-yy), 0),
-                        (0, 0),
                         (1, 0),
                         (0, 1)]
-            return [(-1, 0), (0, 0), (1, 0), (0, 1)]
+            return [(-1, 0), (1, 0), (0, 1)]
         else:
             if y == 9*N - 1:
                 return [(-6*N, 0),
-                        (0, 0),
                         (6 * N, 0),
                         (0, -1)]
             if xx-1 == yy and y >= 6*N:
                 return [(-2*(yy+1), 0),
-                        (0, 0),
                         (1, 0),
                         (0, -1)]
             if (6*N - xx - 1) == yy and y >= 6*N:
                 return [(-1, 0),
-                        (0, 0),
                         (2 * (yy + 1), 0),
                         (0, -1)]
-            return [(-1, 0), (0, 0), (1, 0), (0, -1)]
+            return [(-1, 0), (1, 0), (0, -1)]
 
     def near_cells(self, coord):
         """ Returns tuple of adjacent cells. """
