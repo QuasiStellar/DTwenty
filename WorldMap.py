@@ -4,6 +4,7 @@ import random
 
 import Cell
 
+# Low numbers slow down plate forming, while high makes plates similar.
 OVERGROWTH_FACTOR = 0.5
 
 
@@ -11,13 +12,22 @@ class WorldMap:
 
     def __init__(self, N):
         self.N = N
-        create_cell = lambda x, y: (Cell.Cell(x, y) if self._pos_exists((x, y)) else None)
-        self._map = [[create_cell(x, y) for y in range(9 * self.N)] for x in range(30 * self.N)]
+        # map - 2-dim list of existing cells.
+        self._map = [[self.__create_cell(x, y) for y in range(9 * self.N)] for x in range(30 * self.N)]
+        # cells - tuple of all cells.
         cells = itertools.chain(*self._map)  # join columns
         cells = filter(lambda c: c is not None, cells)
         self.cells = tuple(cells)
 
+    def __create_cell(self, x, y):
+        """ create_cell - Cell object for existing cells. """
+        if self._pos_exists((x, y)):
+            return Cell.Cell(x, y)
+        else:
+            return None
+
     def _pos_exists(self, pos):
+        """ Boolean indicator of cell existence. """
         x, y = pos
         if y < 3*self.N:
             xx = x % (6 * self.N)
@@ -39,6 +49,7 @@ class WorldMap:
         return True
 
     def get_directions(self, x, y):
+        """ Return tuple of  """
         N = self.N
         xx = x % (6 * N)
         yy = y % (6 * N)
@@ -102,16 +113,21 @@ class WorldMap:
             return [(0, -1), (0, -1), (0, -1), (-1, 0), (1, 0), (-1, 0), (0, 0), (1, 0)]
 
     def near_cells(self, coord):
+        """ Returns tuple of adjacent cells. """
         directions = self.get_directions(*coord)
         positions_near = map(lambda d: (coord[0]+d[0], coord[1]+d[1]), directions)
         cells_near = map(lambda pos: self._map[pos[0]][pos[1]], positions_near)
-        return cells_near
+        return tuple(cells_near)
 
     def tectonic(self, plate_count):
+        # already_in_plate - set of all marked cells (represented as coordinates tuples).
         already_in_plate = set()
+        # plate represented as set of coordinates tuples
         plates = []
+        # plate_centers consists of centers' coordinates tuples.
         plate_centers = random.sample(self.cells, plate_count)
         plate_centers = map(lambda c: (c.x, c.y), plate_centers)
+        # Plate centers determination.
         for plate_index, plate_center in enumerate(plate_centers):
             plates.append({plate_center})
             already_in_plate.add(plate_center)
@@ -119,6 +135,7 @@ class WorldMap:
             num = 1 + plate_index
             self._map[x][y].plate = num
             self._map[x][y].color = arcade.color.RED
+        # Other cells distribution.
         while len(already_in_plate) != 180 * self.N ** 2:
             for pos in tuple(already_in_plate):
                 cell_itself = self._map[pos[0]][pos[1]]
