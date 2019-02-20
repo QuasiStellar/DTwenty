@@ -10,8 +10,8 @@ OVERGROWTH_FACTOR = 0.5
 
 class WorldMap:
 
-    def __init__(self, N):
-        self.N = N
+    def __init__(self, n):
+        self.N = n
         # map - 2-dim list of existing cells.
         self._map = [[self.__create_cell(x, y) for y in range(9 * self.N)] for x in range(30 * self.N)]
         # cells - tuple of all cells.
@@ -49,7 +49,7 @@ class WorldMap:
         return True
 
     def get_directions(self, x, y):
-        """ Return tuple of  """
+        """ Returns tuple of possible directions. """
         N = self.N
         xx = x % (6 * N)
         yy = y % (6 * N)
@@ -58,59 +58,35 @@ class WorldMap:
                 return [(-6*N, 0),
                         (0, 0),
                         (6*N, 0),
-                        (-6*N, 0),
-                        (6*N, 0),
-                        (0, 1),
-                        (0, 1),
                         (0, 1)]
             if xx == yy and y < 3*N:
                 return [(-1, 0),
                         (0, 0),
                         (2*(3*N-yy), 0),
-                        (-1, 0),
-                        (2*(3*N-yy), 0),
-                        (0, 1),
-                        (0, 1),
                         (0, 1)]
             if (6*N - xx) == yy and y < 3*N:
                 return [(-2*(3*N-yy), 0),
                         (0, 0),
                         (1, 0),
-                        (-2*(3*N-yy), 0),
-                        (1, 0),
-                        (0, 1),
-                        (0, 1),
                         (0, 1)]
-            return [(-1, 0), (0, 0), (1, 0), (-1, 0), (1, 0), (0, 1), (0, 1), (0, 1)]
+            return [(-1, 0), (0, 0), (1, 0), (0, 1)]
         else:
             if y == 9*N - 1:
-                return [(0, -1),
-                        (0, -1),
-                        (0, -1),
-                        (-6*N, 0),
-                        (6*N, 0),
-                        (-6*N, 0),
+                return [(-6*N, 0),
                         (0, 0),
-                        (6*N, 0)]
+                        (6 * N, 0),
+                        (0, -1)]
             if xx-1 == yy and y >= 6*N:
-                return [(0, -1),
-                        (0, -1),
-                        (0, -1),
-                        (-2*(yy+1), 0),
+                return [(-2*(yy+1), 0),
+                        (0, 0),
                         (1, 0),
-                        (-2*(yy+1), 0),
-                        (0, 0),
-                        (1, 0)]
+                        (0, -1)]
             if (6*N - xx - 1) == yy and y >= 6*N:
-                return [(0, -1),
-                        (0, -1),
-                        (0, -1),
-                        (-1, 0),
-                        (2*(yy+1), 0),
-                        (-1, 0),
+                return [(-1, 0),
                         (0, 0),
-                        (2*(yy+1), 0)]
-            return [(0, -1), (0, -1), (0, -1), (-1, 0), (1, 0), (-1, 0), (0, 0), (1, 0)]
+                        (2 * (yy + 1), 0),
+                        (0, -1)]
+            return [(-1, 0), (0, 0), (1, 0), (0, -1)]
 
     def near_cells(self, coord):
         """ Returns tuple of adjacent cells. """
@@ -132,8 +108,7 @@ class WorldMap:
             plates.append({plate_center})
             already_in_plate.add(plate_center)
             x, y = plate_center
-            num = 1 + plate_index
-            self._map[x][y].plate = num
+            self._map[x][y].plate = plate_index
             self._map[x][y].color = arcade.color.RED
         # Other cells distribution.
         while len(already_in_plate) != 180 * self.N ** 2:
