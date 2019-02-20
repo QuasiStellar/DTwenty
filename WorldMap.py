@@ -2,7 +2,6 @@ import arcade
 import itertools
 import random
 
-import Game
 import Cell
 
 OVERGROWTH_FACTOR = 0.5
@@ -10,79 +9,79 @@ OVERGROWTH_FACTOR = 0.5
 
 class WorldMap(object):
 
-    def __init__(self):
+    def __init__(self, N):
+        self.N = N
         create_cell = lambda x, y: Cell.Cell(x, y) if self._pos_exists((x, y)) else None
-        self._map = [[create_cell(x, y) for y in range(9 * Game.N)] for x in range(30 * Game.N)]
+        self._map = [[create_cell(x, y) for y in range(9 * self.N)] for x in range(30 * self.N)]
         cells = itertools.chain(*self._map)  # join columns
         cells = filter(lambda c: c is not None, cells)
         self.cells = tuple(cells)
 
-    @staticmethod
-    def _pos_exists(pos):
+    def _pos_exists(self, pos):
         x, y = pos
-        if y < 3*Game.N:
-            xx = x % (6 * Game.N)
-            if xx <= 3*Game.N:
+        if y < 3*self.N:
+            xx = x % (6 * self.N)
+            if xx <= 3*self.N:
                 if xx > y:
                     return False
             else:
-                if 6*Game.N-xx > y:
+                if 6*self.N-xx > y:
                     return False
-        elif y >= 6*Game.N:
-            xx = x % (6 * Game.N)
-            yy = y % (6 * Game.N)
-            if xx <= 3*Game.N:
+        elif y >= 6*self.N:
+            xx = x % (6 * self.N)
+            yy = y % (6 * self.N)
+            if xx <= 3*self.N:
                 if xx <= yy:
                     return False
             else:
-                if 6*Game.N-xx <= yy:
+                if 6*self.N-xx <= yy:
                     return False
         return True
 
-    @staticmethod
-    def get_directions(x, y):
-        xx = x % (6 * Game.N)
-        yy = y % (6 * Game.N)
+    def get_directions(self, x, y):
+        N = self.N
+        xx = x % (6 * N)
+        yy = y % (6 * N)
         if (x + y) % 2 == 0:
             if y == 0:
-                return [(-6*Game.N, 0),
+                return [(-6*N, 0),
                         (0, 0),
-                        (6*Game.N, 0),
-                        (-6*Game.N, 0),
-                        (6*Game.N, 0),
+                        (6*N, 0),
+                        (-6*N, 0),
+                        (6*N, 0),
                         (0, 1),
                         (0, 1),
                         (0, 1)]
-            if xx == yy and y < 3*Game.N:
+            if xx == yy and y < 3*N:
                 return [(-1, 0),
                         (0, 0),
-                        (2*(3*Game.N-yy), 0),
+                        (2*(3*N-yy), 0),
                         (-1, 0),
-                        (2*(3*Game.N-yy), 0),
+                        (2*(3*N-yy), 0),
                         (0, 1),
                         (0, 1),
                         (0, 1)]
-            if (6*Game.N - xx) == yy and y < 3*Game.N:
-                return [(-2*(3*Game.N-yy), 0),
+            if (6*N - xx) == yy and y < 3*N:
+                return [(-2*(3*N-yy), 0),
                         (0, 0),
                         (1, 0),
-                        (-2*(3*Game.N-yy), 0),
+                        (-2*(3*N-yy), 0),
                         (1, 0),
                         (0, 1),
                         (0, 1),
                         (0, 1)]
             return [(-1, 0), (0, 0), (1, 0), (-1, 0), (1, 0), (0, 1), (0, 1), (0, 1)]
         else:
-            if y == 9*Game.N-1:
+            if y == 9*N - 1:
                 return [(0, -1),
                         (0, -1),
                         (0, -1),
-                        (-6*Game.N, 0),
-                        (6*Game.N, 0),
-                        (-6*Game.N, 0),
+                        (-6*N, 0),
+                        (6*N, 0),
+                        (-6*N, 0),
                         (0, 0),
-                        (6*Game.N, 0)]
-            if xx-1 == yy and y >= 6*Game.N:
+                        (6*N, 0)]
+            if xx-1 == yy and y >= 6*N:
                 return [(0, -1),
                         (0, -1),
                         (0, -1),
@@ -91,7 +90,7 @@ class WorldMap(object):
                         (-2*(yy+1), 0),
                         (0, 0),
                         (1, 0)]
-            if (6*Game.N - xx - 1) == yy and y >= 6*Game.N:
+            if (6*N - xx - 1) == yy and y >= 6*N:
                 return [(0, -1),
                         (0, -1),
                         (0, -1),
@@ -102,10 +101,9 @@ class WorldMap(object):
                         (2*(yy+1), 0)]
             return [(0, -1), (0, -1), (0, -1), (-1, 0), (1, 0), (-1, 0), (0, 0), (1, 0)]
 
-    @staticmethod
-    def near_cells(coord):
-        near = WorldMap.get_directions(coord[0], coord[1])
-        near_cells = map(lambda i: Game.world_map.map[coord[0]+near[i][0]][coord[1]+near[i][1]], (i for i in range(8)))
+    def near_cells(self, coord):
+        near = self.get_directions(*coord)
+        near_cells = map(lambda i: self._map[coord[0]+near[i][0]][coord[1]+near[i][1]], range(8))
         return near_cells
 
     def tectonic(self, plate_count):
@@ -124,9 +122,9 @@ class WorldMap(object):
             self._map[x][y].plate = num
             self._map[x][y].color = arcade.color.RED
             num += 1
-        while len(positions) != 180 * Game.N ** 2:
+        while len(positions) != 180 * self.N ** 2:
             for pos in tuple(positions):
-                cell_itself = Game.world_map._map[pos[0]][pos[1]]
+                cell_itself = self._map[pos[0]][pos[1]]
                 plate = cell_itself.plate
                 for near_cell in self.near_cells(pos):
                     near_pos = (near_cell.x, near_cell.y)

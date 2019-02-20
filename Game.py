@@ -3,7 +3,6 @@ import os
 import timeit
 
 import Player
-import Cell
 import WorldMap
 
 VERSION = "alpha-0.2"
@@ -23,7 +22,7 @@ N = 2
     Remember that quantity is proportional to the square of edge length.
     Huge values can cause lags and Memory Error (N>80) """
 
-world_map = WorldMap.WorldMap()
+world_map = WorldMap.WorldMap(N)
 
 
 class Game(arcade.Window):
