@@ -8,14 +8,17 @@ import WorldMap
 
 VERSION = "alpha-0.2"
 
+""" Path for files (not used yet). """
 file_path = os.path.dirname(os.path.abspath(__file__))
 os.chdir(file_path)
 
+""" Size of the default window. """
 SCREEN_WIDTH = 1500
 SCREEN_HEIGHT = 780
 
 SCREEN_TITLE = "D20"
 
+""" Amount of plates into which we divide the map. """
 TECTONIC_PLATES = 5
 
 N = 2
@@ -23,6 +26,7 @@ N = 2
     Remember that quantity is proportional to the square of edge length.
     Huge values can cause lags and Memory Error (N>80) """
 
+""" WorldMap object - main map. """
 world_map = WorldMap.WorldMap()
 
 
@@ -31,21 +35,32 @@ class Game(arcade.Window):
     def __init__(self, width, height):
         super().__init__(width, height, SCREEN_TITLE, fullscreen=False)
 
+        """ Player object - a dot moving through the map. """
         self.player = Player.Player(0, 0)
+
+        """ ShapeElementList object for borders drawing. See setup() """
         self.borders = None
+
+        """ ShapeElementList object for cells drawing. See setup() & re_setup() """
         self.cells = None
+
+        """ Time tracking. """
         self.draw_time = 0
+
         self.hints_on = False
         self.hints_notification = True
-
-        self.cell_list = []
-
         self.debug_mod = False
+
+        """ List of dots for drawing. """
+        self.dot_list = []
 
         arcade.set_background_color(arcade.color.BLACK)
 
+    """ Map visual part setup."""
     def setup(self):
         self.borders = arcade.ShapeElementList()
+
+        """ Coordinates for default window size. """
         point_list_1 = ((0, 520),
                         (150, 780),
                         (300, 520),
@@ -68,26 +83,31 @@ class Game(arcade.Window):
                         (300, 0),
                         (150, 260),
                         (0, 0))
+
+        """ Borders drawing. """
         border_1 = arcade.create_line_strip(point_list_1, arcade.color.WHITE, 2)
         border_2 = arcade.create_line_strip(point_list_2, arcade.color.WHITE, 2)
         self.borders.append(border_1)
         self.borders.append(border_2)
 
+        """ Cells drawing. """
         self.cells = arcade.ShapeElementList()
         color_list = []
 
         cell_height = 260 / (N * 3)
         cell_width = 300 / (N * 3)
 
+        """ world_map.cells - all cells tuple. """
         for cell in world_map.cells:
             triangle = self._get_triangle_vertices(cell, cell_width, cell_height)
             for vertex in triangle:
-                self.cell_list.append(vertex)
+                self.dot_list.append(vertex)
             color_list.extend(3*[cell.color])
 
-        cells_grid = arcade.create_triangles_filled_with_colors(self.cell_list, color_list)
+        cells_grid = arcade.create_triangles_filled_with_colors(self.dot_list, color_list)
         self.cells.append(cells_grid)
 
+    """ Tuple of vertex coordinates. """
     @staticmethod
     def _get_triangle_vertices(cell, cell_width, cell_height):
         down_y = cell.y
@@ -114,28 +134,34 @@ class Game(arcade.Window):
             triangle[vertex_index] = tuple(vertex)
         return tuple(triangle)
 
+    """ Map visual part update. """
     def re_setup(self):
+
         self.cells = arcade.ShapeElementList()
 
         color_list = []
 
+        """ Colors recalculation. """
         for cell in world_map.cells:
             color = 3*[cell.color]
             color_list.extend(color)
 
-        cells_grid = arcade.create_triangles_filled_with_colors(self.cell_list, color_list)
+        cells_grid = arcade.create_triangles_filled_with_colors(self.dot_list, color_list)
         self.cells.append(cells_grid)
 
+    """ Visual part render. """
     def on_draw(self):
 
         arcade.start_render()
 
+        """ Timer zeroing. """
         draw_start_time = timeit.default_timer()
 
         self.cells.draw()
         self.borders.draw()
         self.player.draw()
 
+        """ Debug mod. """
         if self.debug_mod:
             output = f"{1/(self.draw_time+0.001):.0f} fps"
             arcade.draw_text(output, 20, SCREEN_HEIGHT - 40, arcade.color.WHITE, 18,
@@ -143,10 +169,12 @@ class Game(arcade.Window):
             arcade.draw_text(VERSION, 230, SCREEN_HEIGHT - 40, arcade.color.WHITE, 18,
                              font_name=('Century Gothic', 'Arial'))
 
+        """ Hints notification. """
         if self.hints_notification:
             arcade.draw_text("Press H", SCREEN_WIDTH - 90, SCREEN_HEIGHT - 40, arcade.color.WHITE, 18,
                              font_name=('Century Gothic', 'Arial'))
 
+        """ Hints. """
         if self.hints_on:
             self.draw_hints_window()
 
@@ -155,25 +183,33 @@ class Game(arcade.Window):
     def update(self, delta_time):
         pass
 
+    """ Input treatment. """
     def on_key_press(self, symbol, modifiers: int):
+
+        """ Full Screen. """
         if symbol == arcade.key.F:
             self.set_fullscreen(not self.fullscreen)
             self.set_viewport(0, SCREEN_WIDTH, 0, SCREEN_HEIGHT)
 
+        """ Debug Mod. """
         if symbol == arcade.key.F3:
             self.debug_mod = not self.debug_mod
 
+        """ Hints. """
         if symbol == arcade.key.H:
             self.hints_on = not self.hints_on
             self.hints_notification = False
 
+        """ Tectonic Generation (WIP). """
         if symbol == arcade.key.T:
             world_map.tectonic(TECTONIC_PLATES)
             self.re_setup()
 
+        """ Coordinates. """
         if symbol == arcade.key.S:
             self.player.coord = not self.player.coord
 
+        """ Movement. """
         movement_keys = (
             arcade.key.Z,
             arcade.key.X,
@@ -191,6 +227,7 @@ class Game(arcade.Window):
             direction = world_map.get_directions(x, y)[direction_index]
             self.player.move(*direction)
 
+    """ Hints window drawing """
     @staticmethod
     def draw_hints_window():
         arcade.draw_rectangle_filled(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, SCREEN_WIDTH - 200,
