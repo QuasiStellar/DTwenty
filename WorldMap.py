@@ -85,7 +85,7 @@ class WorldMap:
     def near_cells(self, coord):
         """ Returns tuple of adjacent cells. """
         directions = self.get_directions(*coord)
-        positions_near = map(lambda d: (coord[0]+d[0], coord[1]+d[1]), directions)
+        positions_near = map(lambda d: ((coord[0]+d[0]) % (30*self.N), coord[1]+d[1]), directions)
         cells_near = map(lambda pos: self._map[pos[0]][pos[1]], positions_near)
         return tuple(cells_near)
 
@@ -117,4 +117,4 @@ class WorldMap:
                             plates[plate].add(near_pos)
                             x, y = near_pos
                             self._map[x][y].plate = plate
-                            self._map[x][y].color = arcade.color.BLUE
+                            self._map[x][y].color = (100 + 30*plate, 100 + 30*plate, 100 + 30*plate)
