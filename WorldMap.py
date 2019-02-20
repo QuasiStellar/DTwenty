@@ -7,11 +7,11 @@ import Cell
 OVERGROWTH_FACTOR = 0.5
 
 
-class WorldMap(object):
+class WorldMap:
 
     def __init__(self, N):
         self.N = N
-        create_cell = lambda x, y: Cell.Cell(x, y) if self._pos_exists((x, y)) else None
+        create_cell = lambda x, y: (Cell.Cell(x, y) if self._pos_exists((x, y)) else None)
         self._map = [[create_cell(x, y) for y in range(9 * self.N)] for x in range(30 * self.N)]
         cells = itertools.chain(*self._map)  # join columns
         cells = filter(lambda c: c is not None, cells)
@@ -102,35 +102,32 @@ class WorldMap(object):
             return [(0, -1), (0, -1), (0, -1), (-1, 0), (1, 0), (-1, 0), (0, 0), (1, 0)]
 
     def near_cells(self, coord):
-        near = self.get_directions(*coord)
-        near_cells = map(lambda i: self._map[coord[0]+near[i][0]][coord[1]+near[i][1]], range(8))
-        return near_cells
+        directions = self.get_directions(*coord)
+        positions_near = map(lambda d: (coord[0]+d[0], coord[1]+d[1]), directions)
+        cells_near = map(lambda pos: self._map[pos[0]][pos[1]], positions_near)
+        return cells_near
 
     def tectonic(self, plate_count):
-        positions = set()
+        already_in_plate = set()
         plates = []
         plate_centers = random.sample(self.cells, plate_count)
         plate_centers = map(lambda c: (c.x, c.y), plate_centers)
-        plate_centers = set(plate_centers)
-        num = 1
-        for plate_center in plate_centers:
-            plate_set = set()
-            plate_set.add(plate_center)
-            plates.append(set(plate_set))
-            positions.add(plate_center)
+        for plate_index, plate_center in enumerate(plate_centers):
+            plates.append({plate_center})
+            already_in_plate.add(plate_center)
             x, y = plate_center
+            num = 1 + plate_index
             self._map[x][y].plate = num
             self._map[x][y].color = arcade.color.RED
-            num += 1
-        while len(positions) != 180 * self.N ** 2:
-            for pos in tuple(positions):
+        while len(already_in_plate) != 180 * self.N ** 2:
+            for pos in tuple(already_in_plate):
                 cell_itself = self._map[pos[0]][pos[1]]
                 plate = cell_itself.plate
                 for near_cell in self.near_cells(pos):
                     near_pos = (near_cell.x, near_cell.y)
-                    if near_pos not in positions:
+                    if near_pos not in already_in_plate:
                         if random.random() < OVERGROWTH_FACTOR:
-                            positions.add(near_pos)
+                            already_in_plate.add(near_pos)
                             plates[plate].add(near_pos)
                             x, y = near_pos
                             self._map[x][y].plate = plate
