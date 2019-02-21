@@ -12,7 +12,8 @@ class Player(object):
         self.coord = False
 
     def move(self, x, y):
-        """ Move player.
+        """
+        Move player.
         x and y - offsets.
         """
         self.x = (self.x + x) % (30 * Game.N)

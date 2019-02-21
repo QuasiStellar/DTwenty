@@ -3,6 +3,7 @@ import itertools
 import random
 
 import Cell
+import TectonicPlate
 
 # Low numbers slow down plate forming, while high makes distances from the border to the plate centers similar.
 OVERGROWTH_FACTOR = 0.5
@@ -20,7 +21,7 @@ class WorldMap:
         self.cells = tuple(cells)
 
     def __create_cell(self, x, y):
-        """ create_cell - Cell object for existing cells. """
+        """ Cell object for existing cells. """
         if self._pos_exists((x, y)):
             return Cell.Cell(x, y)
         else:
@@ -89,19 +90,22 @@ class WorldMap:
         cells_near = map(lambda pos: self._map[pos[0]][pos[1]], positions_near)
         return tuple(cells_near)
 
-    def tectonic(self, plate_count):
+    def tectonic_generation(self, plate_count):
         # already_in_plate - set of all marked cells (represented as coordinates tuples).
         already_in_plate = set()
         # border_cells - set of cells which have undistributed neighbours.
         border_cells = set()
-        # plate represented as set of coordinates tuples
+        # plates - list of TectonicPlates
         plates = []
         # plate_centers consists of centers' coordinates tuples.
         plate_centers = random.sample(self.cells, plate_count)
         plate_centers = map(lambda c: (c.x, c.y), plate_centers)
         # Plate centers determination.
         for plate_index, plate_center in enumerate(plate_centers):
-            plates.append({plate_center})
+            new_plate = TectonicPlate.TectonicPlate(plate_index)
+            plates.append(new_plate)
+            new_plate.cells.add(plate_center)
+            new_plate.overgrowth_factor = random.random()
             already_in_plate.add(plate_center)
             border_cells.add(plate_center)
             x, y = plate_center
@@ -117,10 +121,10 @@ class WorldMap:
                     near_pos = (near_cell.x, near_cell.y)
                     if near_pos not in already_in_plate:
                         any_neighbours = True
-                        if random.random() < OVERGROWTH_FACTOR:
+                        if random.random() < plates[plate].overgrowth_factor:
                             already_in_plate.add(near_pos)
                             border_cells.add(near_pos)
-                            plates[plate].add(near_pos)
+                            plates[plate].cells.add(near_pos)
                             x, y = near_pos
                             self._map[x][y].plate = plate
                             self._map[x][y].color = (100 + 5*plate, 100 + 5*plate, 100 + 5*plate)
