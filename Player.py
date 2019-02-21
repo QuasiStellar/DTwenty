@@ -8,15 +8,12 @@ class Player(object):
     def __init__(self, x, y):
         self.x = x
         self.y = y
-        # Coordinates visualisation.
-        self.coord = False
+        self.display_coordinates = False
 
-    def move(self, x, y):
-        """ Move player.
-        x and y - offsets.
-        """
-        self.x = (self.x + x) % (30 * Game.N)
-        self.y += y
+    def move(self, dx, dy):
+        """ Move player. """
+        self.x = (self.x + dx) % (30 * Game.N)
+        self.y += dy
 
     def draw(self):
         """ Draw player. """
@@ -27,8 +24,8 @@ class Player(object):
                                   round(height * ((0.33 + 0.33 * (self.x % 2 == self.y % 2)) + self.y)),
                                   3,
                                   arcade.color.BLACK)
-        # Draw numbers
-        if self.coord:
+        if self.display_coordinates:
+            # Draw numbers
             arcade.draw_text(str(self.x) + ' ' + str(self.y),
                              round(width * (self.x / 2)),
                              round(height * (0.33 * (self.x % 2 == self.y % 2) + self.y) + 30),

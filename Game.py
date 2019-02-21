@@ -198,7 +198,7 @@ class Game(arcade.Window):
 
         # Coordinates.
         if symbol == arcade.key.S:
-            self.player.coord = not self.player.coord
+            self.player.display_coordinates = not self.player.display_coordinates
 
         # Movement.
         movement_keys = (
