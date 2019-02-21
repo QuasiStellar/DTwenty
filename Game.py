@@ -18,9 +18,9 @@ SCREEN_HEIGHT = 780
 SCREEN_TITLE = "D20"
 
 """ Amount of plates into which we divide the map. """
-TECTONIC_PLATES = 5
+TECTONIC_PLATES = 30
 
-N = 2
+N = 10
 """ You can change this constant. It determines an amount of cells on your map (3N cells on one side).
     Remember that quantity is proportional to the square of edge length.
     Huge values can cause lags and Memory Error (N>80) """
