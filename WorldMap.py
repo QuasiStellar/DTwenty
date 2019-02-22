@@ -6,11 +6,6 @@ import Icosahedron
 import TectonicPlate
 
 
-# Low numbers slow down plate forming,
-# while high makes distances from the border to the plate centers similar.
-OVERGROWTH_FACTOR = 0.5
-
-
 class WorldMap(Icosahedron.Icosahedron):
 
     def __init__(self, n):
@@ -31,7 +26,7 @@ class WorldMap(Icosahedron.Icosahedron):
             new_plate = TectonicPlate.TectonicPlate(plate_index)
             plates.append(new_plate)
             new_plate.cells.add(plate_center)
-            new_plate.overgrowth_factor = random.random()
+            new_plate.overgrowth_factor = random.random()/2 + 0.5
             already_in_plate.add(plate_center)
             border_cells.add(plate_center)
             x, y = plate_center
