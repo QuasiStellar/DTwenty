@@ -13,7 +13,7 @@ class Icosahedron:
         self.cells = tuple(cells)
 
     def __create_cell(self, x, y):
-        """ create_cell - Cell object for existing cells. """
+        """ Returns cell object for existing cells. """
         if self._pos_exists((x, y)):
             return self._cell_class(x, y)
         else:
