@@ -21,23 +21,24 @@ class Icosahedron:
 
     def _pos_exists(self, pos):
         """ Boolean indicator of cell existence. """
+        N = self.N
         x, y = pos
-        if y < 3*self.N:
-            xx = x % (6 * self.N)
-            if xx <= 3*self.N:
+        if y < 3*N:
+            xx = x % (6 * N)
+            if xx <= 3*N:
                 if xx > y:
                     return False
             else:
-                if 6*self.N-xx > y:
+                if 6*N-xx > y:
                     return False
-        elif y >= 6*self.N:
-            xx = x % (6 * self.N)
-            yy = y % (6 * self.N)
-            if xx <= 3*self.N:
+        elif y >= 6*N:
+            xx = x % (6 * N)
+            yy = y % (6 * N)
+            if xx <= 3*N:
                 if xx <= yy:
                     return False
             else:
-                if 6*self.N-xx <= yy:
+                if 6*N-xx <= yy:
                     return False
         return True
 
