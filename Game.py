@@ -98,8 +98,7 @@ class Game(arcade.Window):
 
         for cell in world_map.cells:
             triangle = self._get_triangle_vertices(cell, cell_width, cell_height)
-            for vertex in triangle:
-                self.dot_list.append(vertex)
+            self.dot_list.extend(triangle)
             color_list.extend(3*[cell.color])
 
         cells_grid = arcade.create_triangles_filled_with_colors(self.dot_list, color_list)
@@ -198,7 +197,7 @@ class Game(arcade.Window):
 
         # Coordinates.
         if symbol == arcade.key.S:
-            self.player.coord = not self.player.coord
+            self.player.display_coordinates = not self.player.display_coordinates
 
         # Movement.
         movement_keys = (
