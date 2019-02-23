@@ -1,12 +1,21 @@
+import collections
 import itertools
+
+
+_Size = collections.namedtuple("Size", "x y")
 
 
 class Icosahedron:
     def __init__(self, n, cell_class):
         self._cell_class = cell_class
         self.N = n
+        edge_size = 3*n
+        x_size = 10*edge_size
+        y_size = 3*edge_size
+        self.size = _Size(x_size, y_size)
         # map - 2-dim list of existing cells.
-        self._map = [[self.__create_cell(x, y) for y in range(9 * self.N)] for x in range(30 * self.N)]
+        self._map = [[self.__create_cell(x, y) for y in range(y_size)]
+                     for x in range(x_size)]
         # cells - tuple of all cells.
         cells = itertools.chain(*self._map)  # join columns
         cells = filter(lambda c: c is not None, cells)
@@ -20,27 +29,21 @@ class Icosahedron:
             return None
 
     def _pos_exists(self, pos):
-        """ Boolean indicator of cell existence. """
-        N = self.N
+        """ Returns True if cell exist. """
         x, y = pos
-        if y < 3*N:
-            xx = x % (6 * N)
-            if xx <= 3*N:
-                if xx > y:
-                    return False
-            else:
-                if 6*N-xx > y:
-                    return False
-        elif y >= 6*N:
-            xx = x % (6 * N)
-            yy = y % (6 * N)
-            if xx <= 3*N:
-                if xx <= yy:
-                    return False
-            else:
-                if 6*N-xx <= yy:
-                    return False
-        return True
+        if not (0 <= x < self.size.x and 0 <= y < self.size.y):
+            return False
+        edge_size = 3*self.N
+        face_height = edge_size
+        period = 2*edge_size
+        xx = x % period
+        if xx <= period/2:
+            relative_y_border = xx
+        else:
+            relative_y_border = period - xx
+        min_y = 0 + relative_y_border
+        max_y = 2*face_height + relative_y_border - 1
+        return min_y <= y <= max_y
 
     def get_directions(self, x, y):
         """ Returns tuple of possible directions. """
