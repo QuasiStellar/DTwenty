@@ -47,33 +47,33 @@ class Icosahedron:
 
     def get_directions(self, x, y):
         """ Returns tuple of possible directions. """
-        N = self.N
-        xx = x % (6 * N)
-        yy = y % (6 * N)
+        n = self.N
+        xx = x % (6 * n)
+        yy = y % (6 * n)
         if (x + y) % 2 == 0:
             if y == 0:
-                return [(-6*N, 0),
-                        (6*N, 0),
+                return [(-6*n, 0),
+                        (6*n, 0),
                         (0, 1)]
-            if xx == yy and y < 3*N:
+            if xx == yy and y < 3*n:
                 return [(-1, 0),
-                        (2*(3*N-yy), 0),
+                        (2*(3*n-yy), 0),
                         (0, 1)]
-            if (6*N - xx) == yy and y < 3*N:
-                return [(-2*(3*N-yy), 0),
+            if (6*n - xx) == yy and y < 3*n:
+                return [(-2*(3*n-yy), 0),
                         (1, 0),
                         (0, 1)]
             return [(-1, 0), (1, 0), (0, 1)]
         else:
-            if y == 9*N - 1:
-                return [(-6*N, 0),
-                        (6 * N, 0),
+            if y == 9*n - 1:
+                return [(-6*n, 0),
+                        (6 * n, 0),
                         (0, -1)]
-            if xx-1 == yy and y >= 6*N:
+            if xx-1 == yy and y >= 6*n:
                 return [(-2*(yy+1), 0),
                         (1, 0),
                         (0, -1)]
-            if (6*N - xx - 1) == yy and y >= 6*N:
+            if (6*n - xx - 1) == yy and y >= 6*n:
                 return [(-1, 0),
                         (2 * (yy + 1), 0),
                         (0, -1)]

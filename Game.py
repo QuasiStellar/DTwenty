@@ -5,7 +5,7 @@ import timeit
 import Player
 import WorldMap
 
-VERSION = "alpha-0.2"
+VERSION = "alpha-0.3"
 
 """ Path for files (not used yet). """
 file_path = os.path.dirname(os.path.abspath(__file__))
@@ -18,7 +18,7 @@ SCREEN_HEIGHT = 780
 SCREEN_TITLE = "D20"
 
 """ Amount of plates into which we divide the map. """
-TECTONIC_PLATES = 30
+TECTONIC_PLATES = 200
 
 N = 20
 """ You can change this constant. It determines an amount of cells on your map (3N cells on one side).
@@ -49,6 +49,8 @@ class Game(arcade.Window):
         self.hints_on = False
         self.hints_notification = True
         self.debug_mod = False
+
+        self.mod = 'common'
 
         # List of dots for drawing.
         self.dot_list = []
@@ -139,7 +141,10 @@ class Game(arcade.Window):
 
         # Colors recalculation.
         for cell in world_map.cells:
-            color = 3*[cell.color]
+            if self.mod == 'tectonic':
+                color = 3*[cell.tectonic_color]
+            else:
+                color = 3 * [cell.color]
             color_list.extend(color)
 
         cells_grid = arcade.create_triangles_filled_with_colors(self.dot_list, color_list)
@@ -160,6 +165,8 @@ class Game(arcade.Window):
             arcade.draw_text(output, 20, SCREEN_HEIGHT - 40, arcade.color.WHITE, 18,
                              font_name=('Century Gothic', 'Arial'))
             arcade.draw_text(VERSION, 230, SCREEN_HEIGHT - 40, arcade.color.WHITE, 18,
+                             font_name=('Century Gothic', 'Arial'))
+            arcade.draw_text('Mod: ' + self.mod, 500, SCREEN_HEIGHT - 40, arcade.color.WHITE, 18,
                              font_name=('Century Gothic', 'Arial'))
 
         if self.hints_notification:
@@ -185,6 +192,16 @@ class Game(arcade.Window):
         if symbol == arcade.key.F3:
             self.debug_mod = not self.debug_mod
 
+        # Common Mod.
+        if symbol == arcade.key.KEY_1:
+            self.mod = 'common'
+            self.re_setup()
+
+        # Tectonic Mod.
+        if symbol == arcade.key.KEY_2:
+            self.mod = 'tectonic'
+            self.re_setup()
+
         # Hints.
         if symbol == arcade.key.H:
             self.hints_on = not self.hints_on
@@ -193,7 +210,6 @@ class Game(arcade.Window):
         # Tectonic Generation (WIP).
         if symbol == arcade.key.T:
             world_map.tectonic_generation(TECTONIC_PLATES)
-            self.re_setup()
 
         # Coordinates.
         if symbol == arcade.key.S:
