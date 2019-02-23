@@ -1,7 +1,8 @@
-import arcade
 import itertools
 import os
 import timeit
+
+import arcade
 
 import Player
 import WorldMap

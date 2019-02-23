@@ -1,5 +1,6 @@
-import arcade
 import random
+
+import arcade
 
 import Cell
 import Icosahedron
