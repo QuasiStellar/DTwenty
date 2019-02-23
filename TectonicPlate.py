@@ -6,3 +6,5 @@ class TectonicPlate(object):
         self.velocity = None
         self.cells = set()
         self.overgrowth_factor = 1
+        self.size = 0
+        self.type = 'oceanic'

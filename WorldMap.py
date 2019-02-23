@@ -1,10 +1,11 @@
 import random
 
-import arcade
-
 import Cell
 import Icosahedron
 import TectonicPlate
+
+""" Chance for a plate to be continental rather then oceanic. """
+CONTINENTAL = 0.5
 
 
 class WorldMap(Icosahedron.Icosahedron):
@@ -27,12 +28,15 @@ class WorldMap(Icosahedron.Icosahedron):
             new_plate = TectonicPlate.TectonicPlate(plate_index)
             plates.append(new_plate)
             new_plate.cells.add(plate_center)
-            new_plate.overgrowth_factor = random.random()/2 + 0.5
+            new_plate.size += 1
+            if random.random() > CONTINENTAL:
+                new_plate.type = 'continental'
+            new_plate.overgrowth_factor = random.random()/4*3 + 0.25
             already_in_plate.add(plate_center)
             border_cells.add(plate_center)
             x, y = plate_center
             self._map[x][y].plate = plate_index
-            self._map[x][y].color = arcade.color.RED
+            self._map[x][y].tectonic_color = (100 + 1*plate_index, 100 + 1*plate_index, 100 + 1*plate_index)
         # Other cells distribution.
         while len(already_in_plate) != 180 * self.N ** 2:
             for pos in tuple(border_cells):
@@ -47,8 +51,9 @@ class WorldMap(Icosahedron.Icosahedron):
                             already_in_plate.add(near_pos)
                             border_cells.add(near_pos)
                             plates[plate].cells.add(near_pos)
+                            plates[plate].size += 1
                             x, y = near_pos
                             self._map[x][y].plate = plate
-                            self._map[x][y].color = (100 + 5*plate, 100 + 5*plate, 100 + 5*plate)
+                            self._map[x][y].tectonic_color = (100 + 1*plate, 100 + 1*plate, 100 + 1*plate)
                 if not any_neighbours:
                     border_cells.remove(pos)

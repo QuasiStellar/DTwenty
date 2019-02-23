@@ -16,3 +16,5 @@ class Cell(object):
         # Random light-gray shade.
         random_color = random.randint(128, 256)
         self.color = (random_color, random_color, random_color)
+
+        self.tectonic_color = self.color
