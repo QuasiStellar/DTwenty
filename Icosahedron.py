@@ -1,12 +1,21 @@
+import collections
 import itertools
+
+
+_Size = collections.namedtuple("Size", "x y")
 
 
 class Icosahedron:
     def __init__(self, n, cell_class):
         self._cell_class = cell_class
         self.N = n
+        edge_size = 3*n
+        x_size = 10*edge_size
+        y_size = 3*edge_size
+        self.size = _Size(x_size, y_size)
         # map - 2-dim list of existing cells.
-        self._map = [[self.__create_cell(x, y) for y in range(9 * self.N)] for x in range(30 * self.N)]
+        self._map = [[self.__create_cell(x, y) for y in range(y_size)]
+                     for x in range(x_size)]
         # cells - tuple of all cells.
         cells = itertools.chain(*self._map)  # join columns
         cells = filter(lambda c: c is not None, cells)
