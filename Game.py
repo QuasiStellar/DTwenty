@@ -43,7 +43,7 @@ class Game(arcade.Window):
         # ShapeElementList object for borders drawing. See setup()
         self.borders = None
 
-        # ShapeElementList object for cells drawing. See setup() & re_setup()
+        # ShapeElementList object for cells drawing. See setup() & update_colors()
         self.cells = None
 
         # Time tracking.
@@ -77,20 +77,14 @@ class Game(arcade.Window):
         self.borders.append(border_2)
 
         # Cells drawing.
-        self.cells = arcade.ShapeElementList()
-        color_list = []
-
         edge_size = 3*N
         cell_width = face_width / edge_size
         cell_height = face_height / edge_size
-
         for cell in world_map.cells:
             triangle = self._get_triangle_vertices(cell, cell_width, cell_height)
             self.dot_list.extend(triangle)
-            color_list.extend(3*[cell.color])
 
-        cells_grid = arcade.create_triangles_filled_with_colors(self.dot_list, color_list)
-        self.cells.append(cells_grid)
+        self.update_colors()
 
     @staticmethod
     def _get_triangle_vertices(cell, cell_width, cell_height):
@@ -119,7 +113,7 @@ class Game(arcade.Window):
             triangle[vertex_index] = tuple(vertex)
         return tuple(triangle)
 
-    def re_setup(self):
+    def update_colors(self):
         """ Map visual part update. """
         self.cells = arcade.ShapeElementList()
 
@@ -181,7 +175,7 @@ class Game(arcade.Window):
         # Tectonic Generation (WIP).
         if symbol == arcade.key.T:
             world_map.tectonic_generation(TECTONIC_PLATES)
-            self.re_setup()
+            self.update_colors()
 
         # Coordinates.
         if symbol == arcade.key.S:
