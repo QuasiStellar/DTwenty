@@ -1,4 +1,5 @@
 import arcade
+import itertools
 import os
 import timeit
 
@@ -14,6 +15,8 @@ os.chdir(file_path)
 """ Size of the default window. """
 SCREEN_WIDTH = 1500
 SCREEN_HEIGHT = 780
+
+FACE_SIZE = (300, 260)
 
 SCREEN_TITLE = "D20"
 
@@ -57,31 +60,15 @@ class Game(arcade.Window):
 
     def setup(self):
         """ Map visual part setup."""
+        face_width, face_height = FACE_SIZE
+
         self.borders = arcade.ShapeElementList()
 
-        # Coordinates for default window size.
-        point_list_1 = ((0, 520),
-                        (150, 780),
-                        (300, 520),
-                        (450, 780),
-                        (600, 520),
-                        (750, 780),
-                        (900, 520),
-                        (1050, 780),
-                        (1200, 520),
-                        (1350, 780),
-                        (1500, 520))
-        point_list_2 = ((1500, 0),
-                        (1350, 260),
-                        (1200, 0),
-                        (1050, 260),
-                        (900, 0),
-                        (750, 260),
-                        (600, 0),
-                        (450, 260),
-                        (300, 0),
-                        (150, 260),
-                        (0, 0))
+        x_list = [face_width/2 * i for i in range(11)]
+        y_list_1 = itertools.cycle([0*face_height, 1*face_height])
+        y_list_2 = itertools.cycle([2*face_height, 3*face_height])
+        point_list_1 = tuple(zip(x_list, y_list_1))
+        point_list_2 = tuple(zip(x_list, y_list_2))
 
         # Borders drawing.
         border_1 = arcade.create_line_strip(point_list_1, arcade.color.WHITE, 2)
@@ -93,8 +80,9 @@ class Game(arcade.Window):
         self.cells = arcade.ShapeElementList()
         color_list = []
 
-        cell_height = 260 / (N * 3)
-        cell_width = 300 / (N * 3)
+        edge_size = 3*N
+        cell_width = face_width / edge_size
+        cell_height = face_height / edge_size
 
         for cell in world_map.cells:
             triangle = self._get_triangle_vertices(cell, cell_width, cell_height)
