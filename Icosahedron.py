@@ -29,27 +29,21 @@ class Icosahedron:
             return None
 
     def _pos_exists(self, pos):
-        """ Boolean indicator of cell existence. """
-        N = self.N
+        """ Returns True if cell exist. """
         x, y = pos
-        if y < 3*N:
-            xx = x % (6 * N)
-            if xx <= 3*N:
-                if xx > y:
-                    return False
-            else:
-                if 6*N-xx > y:
-                    return False
-        elif y >= 6*N:
-            xx = x % (6 * N)
-            yy = y % (6 * N)
-            if xx <= 3*N:
-                if xx <= yy:
-                    return False
-            else:
-                if 6*N-xx <= yy:
-                    return False
-        return True
+        if not (0 <= x < self.size.x and 0 <= y < self.size.y):
+            return False
+        edge_size = 3*self.N
+        face_height = edge_size
+        period = 2*edge_size
+        xx = x % period
+        if xx <= period/2:
+            relative_y_border = xx
+        else:
+            relative_y_border = period - xx
+        min_y = 0 + relative_y_border
+        max_y = 2*face_height + relative_y_border - 1
+        return min_y <= y <= max_y
 
     def get_directions(self, x, y):
         """ Returns tuple of possible directions. """
