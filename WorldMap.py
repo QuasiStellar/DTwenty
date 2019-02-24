@@ -1,4 +1,3 @@
-import arcade
 import random
 
 import Cell

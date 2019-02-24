@@ -1,6 +1,8 @@
-import arcade
+import itertools
 import os
 import timeit
+
+import arcade
 
 import Player
 import WorldMap
@@ -14,6 +16,8 @@ os.chdir(file_path)
 """ Size of the default window. """
 SCREEN_WIDTH = 1500
 SCREEN_HEIGHT = 780
+
+FACE_SIZE = (300, 260)
 
 SCREEN_TITLE = "D20"
 
@@ -40,7 +44,7 @@ class Game(arcade.Window):
         # ShapeElementList object for borders drawing. See setup()
         self.borders = None
 
-        # ShapeElementList object for cells drawing. See setup() & re_setup()
+        # ShapeElementList object for cells drawing. See setup() & update_colors()
         self.cells = None
 
         # Time tracking.
@@ -59,31 +63,15 @@ class Game(arcade.Window):
 
     def setup(self):
         """ Map visual part setup."""
+        face_width, face_height = FACE_SIZE
+
         self.borders = arcade.ShapeElementList()
 
-        # Coordinates for default window size.
-        point_list_1 = ((0, 520),
-                        (150, 780),
-                        (300, 520),
-                        (450, 780),
-                        (600, 520),
-                        (750, 780),
-                        (900, 520),
-                        (1050, 780),
-                        (1200, 520),
-                        (1350, 780),
-                        (1500, 520))
-        point_list_2 = ((1500, 0),
-                        (1350, 260),
-                        (1200, 0),
-                        (1050, 260),
-                        (900, 0),
-                        (750, 260),
-                        (600, 0),
-                        (450, 260),
-                        (300, 0),
-                        (150, 260),
-                        (0, 0))
+        x_list = [face_width/2 * i for i in range(11)]
+        y_list_1 = itertools.cycle([0*face_height, 1*face_height])
+        y_list_2 = itertools.cycle([2*face_height, 3*face_height])
+        point_list_1 = tuple(zip(x_list, y_list_1))
+        point_list_2 = tuple(zip(x_list, y_list_2))
 
         # Borders drawing.
         border_1 = arcade.create_line_strip(point_list_1, arcade.color.WHITE, 2)
@@ -92,19 +80,14 @@ class Game(arcade.Window):
         self.borders.append(border_2)
 
         # Cells drawing.
-        self.cells = arcade.ShapeElementList()
-        color_list = []
-
-        cell_height = 260 / (N * 3)
-        cell_width = 300 / (N * 3)
-
+        edge_size = 3*N
+        cell_width = face_width / edge_size
+        cell_height = face_height / edge_size
         for cell in world_map.cells:
             triangle = self._get_triangle_vertices(cell, cell_width, cell_height)
             self.dot_list.extend(triangle)
-            color_list.extend(3*[cell.color])
 
-        cells_grid = arcade.create_triangles_filled_with_colors(self.dot_list, color_list)
-        self.cells.append(cells_grid)
+        self.update_colors()
 
     @staticmethod
     def _get_triangle_vertices(cell, cell_width, cell_height):
@@ -133,7 +116,7 @@ class Game(arcade.Window):
             triangle[vertex_index] = tuple(vertex)
         return tuple(triangle)
 
-    def re_setup(self):
+    def update_colors(self):
         """ Map visual part update. """
         self.cells = arcade.ShapeElementList()
 
@@ -142,7 +125,7 @@ class Game(arcade.Window):
         # Colors recalculation.
         for cell in world_map.cells:
             if self.mod == 'tectonic':
-                color = 3*[cell.tectonic_color]
+                color = 3 * [cell.tectonic_color]
             else:
                 color = 3 * [cell.color]
             color_list.extend(color)
@@ -195,12 +178,12 @@ class Game(arcade.Window):
         # Common Mod.
         if symbol == arcade.key.KEY_1:
             self.mod = 'common'
-            self.re_setup()
+            self.update_colors()
 
         # Tectonic Mod.
         if symbol == arcade.key.KEY_2:
             self.mod = 'tectonic'
-            self.re_setup()
+            self.update_colors()
 
         # Hints.
         if symbol == arcade.key.H:
