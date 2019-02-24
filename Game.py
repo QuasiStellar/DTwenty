@@ -32,17 +32,20 @@ N = 20
     Remember that quantity is proportional to the square of edge length.
     Huge values can cause lags and Memory Error (N>80) """
 
-""" WorldMap object - main map. """
-world_map = WorldMap.WorldMap(N)
 
 
 class Game(arcade.Window):
 
-    def __init__(self, width, height):
+    def __init__(self, width, height, n):
         super().__init__(width, height, SCREEN_TITLE, fullscreen=False)
 
+        self.n = n
+
+        # WorldMap object - main map.
+        self.world_map = WorldMap.WorldMap(n)
+
         # Player object - a dot moving through the map.
-        self.player = Player.Player(0, 0)
+        self.player = Player.Player(0, 0, self.world_map)
 
         # ShapeElementList object for borders drawing. See setup()
         self.borders = None
@@ -84,10 +87,10 @@ class Game(arcade.Window):
         self.borders.append(border_2)
 
         # Cells drawing.
-        edge_size = 3*N
+        edge_size = 3*self.n
         cell_width = face_width / edge_size
         cell_height = face_height / edge_size
-        for cell in world_map.cells:
+        for cell in self.world_map.cells:
             triangle = self._get_triangle_vertices(cell, cell_width, cell_height)
             self.dot_list.extend(triangle)
 
@@ -127,7 +130,7 @@ class Game(arcade.Window):
         color_list = []
 
         # Colors recalculation.
-        for cell in world_map.cells:
+        for cell in self.world_map.cells:
             if self.mod == 'tectonic':
                 color = 3 * [cell.tectonic_color]
             else:
@@ -141,7 +144,7 @@ class Game(arcade.Window):
         """ Draw player. """
         # Draw circle
         player = self.player
-        edge_size = 3*N
+        edge_size = 3*self.n
         face_width, face_height = FACE_SIZE
         cell_width = face_width / edge_size
         cell_height = face_height / edge_size
@@ -221,7 +224,7 @@ class Game(arcade.Window):
 
         # Tectonic Generation.
         if symbol == arcade.key.T:
-            world_map.tectonic_generation(TECTONIC_PLATES)
+            self.world_map.tectonic_generation(TECTONIC_PLATES)
             if self.mod == 'tectonic':
                 self.update_colors()
 
@@ -243,24 +246,25 @@ class Game(arcade.Window):
         if symbol in movement_keys:
             x = self.player.x
             y = self.player.y
+            directions = self.world_map.get_directions(x, y)
             if (x + y) % 2 == 0:
-                directions_by_key = (world_map.get_directions(x, y)[0],
+                directions_by_key = (directions[0],
                                      (0, 0),
-                                     world_map.get_directions(x, y)[1],
-                                     world_map.get_directions(x, y)[0],
-                                     world_map.get_directions(x, y)[1],
-                                     world_map.get_directions(x, y)[2],
-                                     world_map.get_directions(x, y)[2],
-                                     world_map.get_directions(x, y)[2])
+                                     directions[1],
+                                     directions[0],
+                                     directions[1],
+                                     directions[2],
+                                     directions[2],
+                                     directions[2])
             else:
-                directions_by_key = (world_map.get_directions(x, y)[2],
-                                     world_map.get_directions(x, y)[2],
-                                     world_map.get_directions(x, y)[2],
-                                     world_map.get_directions(x, y)[0],
-                                     world_map.get_directions(x, y)[1],
-                                     world_map.get_directions(x, y)[0],
+                directions_by_key = (directions[2],
+                                     directions[2],
+                                     directions[2],
+                                     directions[0],
+                                     directions[1],
+                                     directions[0],
                                      (0, 0),
-                                     world_map.get_directions(x, y)[1])
+                                     directions[1])
             direction_index = movement_keys.index(symbol)
             direction = directions_by_key[direction_index]
             self.player.move(*direction)
@@ -308,7 +312,7 @@ class Game(arcade.Window):
 
 def main():
     random.seed(SEED)
-    game = Game(SCREEN_WIDTH, SCREEN_HEIGHT)
+    game = Game(SCREEN_WIDTH, SCREEN_HEIGHT, N)
     game.setup()
     arcade.run()
 
