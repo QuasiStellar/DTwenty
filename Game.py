@@ -56,6 +56,7 @@ class Game(arcade.Window):
         self.hints_on = False
         self.hints_notification = True
         self.debug_mod = False
+        self.display_player_coordinates = None
 
         self.mod = 'common'
 
@@ -136,6 +137,31 @@ class Game(arcade.Window):
         cells_grid = arcade.create_triangles_filled_with_colors(self.dot_list, color_list)
         self.cells.append(cells_grid)
 
+    def draw_player(self):
+        """ Draw player. """
+        # Draw circle
+        player = self.player
+        edge_size = 3*N
+        face_width, face_height = FACE_SIZE
+        cell_width = face_width / edge_size
+        cell_height = face_height / edge_size
+        arcade.draw_circle_filled(round(cell_width * (player.x / 2)),
+                                  round(cell_height * ((0.33 + 0.33 * (player.x % 2 == player.y % 2)) + player.y)),
+                                  3,
+                                  arcade.color.BLACK)
+        if self.display_player_coordinates:
+            # Draw numbers
+            arcade.draw_text(str(player.x) + ' ' + str(player.y),
+                             round(cell_width * (player.x / 2)),
+                             round(cell_height * (0.33 * (player.x % 2 == player.y % 2) + player.y) + 30),
+                             arcade.color.BLACK,
+                             17,
+                             bold=True,
+                             align="center",
+                             font_name=('Century Gothic', 'Arial'),
+                             anchor_x="center",
+                             anchor_y="center")
+
     def on_draw(self):
         # Visual part render.
         arcade.start_render()
@@ -144,7 +170,7 @@ class Game(arcade.Window):
 
         self.cells.draw()
         self.borders.draw()
-        self.player.draw()
+        self.draw_player()
 
         if self.debug_mod:
             output = f"{1/(self.draw_time+0.001):.0f} fps"
