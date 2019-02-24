@@ -4,9 +4,6 @@ import Cell
 import Icosahedron
 import TectonicPlate
 
-""" Chance for a plate to be continental rather then oceanic. """
-CONTINENTAL = 0.5
-
 
 class WorldMap(Icosahedron.Icosahedron):
 
@@ -29,8 +26,6 @@ class WorldMap(Icosahedron.Icosahedron):
             plates.append(new_plate)
             new_plate.cells.add(plate_center)
             new_plate.size += 1
-            if random.random() > CONTINENTAL:
-                new_plate.type = 'continental'
             new_plate.overgrowth_factor = random.random()/4*3 + 0.25
             already_in_plate.add(plate_center)
             border_cells.add(plate_center)

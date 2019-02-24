@@ -1,6 +1,7 @@
 import itertools
 import os
 import timeit
+import random
 
 import arcade
 
@@ -20,6 +21,8 @@ SCREEN_HEIGHT = 780
 FACE_SIZE = (300, 260)
 
 SCREEN_TITLE = "D20"
+
+SEED = 239
 
 """ Amount of plates into which we divide the map. """
 TECTONIC_PLATES = 200
@@ -190,9 +193,11 @@ class Game(arcade.Window):
             self.hints_on = not self.hints_on
             self.hints_notification = False
 
-        # Tectonic Generation (WIP).
+        # Tectonic Generation.
         if symbol == arcade.key.T:
             world_map.tectonic_generation(TECTONIC_PLATES)
+            if self.mod == 'tectonic':
+                self.update_colors()
 
         # Coordinates.
         if symbol == arcade.key.S:
@@ -276,6 +281,7 @@ class Game(arcade.Window):
 
 
 def main():
+    random.seed(SEED)
     game = Game(SCREEN_WIDTH, SCREEN_HEIGHT)
     game.setup()
     arcade.run()
