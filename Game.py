@@ -32,17 +32,20 @@ N = 20
     Remember that quantity is proportional to the square of edge length.
     Huge values can cause lags and Memory Error (N>80) """
 
-""" WorldMap object - main map. """
-world_map = WorldMap.WorldMap(N)
 
 
 class Game(arcade.Window):
 
-    def __init__(self, width, height):
+    def __init__(self, width, height, n):
         super().__init__(width, height, SCREEN_TITLE, fullscreen=False)
 
+        self.n = n
+
+        # WorldMap object - main map.
+        self.world_map = WorldMap.WorldMap(n)
+
         # Player object - a dot moving through the map.
-        self.player = Player.Player(0, 0)
+        self.player = Player.Player(0, 0, self.world_map)
 
         # ShapeElementList object for borders drawing. See setup()
         self.borders = None
@@ -56,6 +59,7 @@ class Game(arcade.Window):
         self.hints_on = False
         self.hints_notification = True
         self.debug_mod = False
+        self.display_player_coordinates = None
 
         self.mod = 'common'
 
@@ -83,10 +87,10 @@ class Game(arcade.Window):
         self.borders.append(border_2)
 
         # Cells drawing.
-        edge_size = 3*N
+        edge_size = 3*self.n
         cell_width = face_width / edge_size
         cell_height = face_height / edge_size
-        for cell in world_map.cells:
+        for cell in self.world_map.cells:
             triangle = self._get_triangle_vertices(cell, cell_width, cell_height)
             self.dot_list.extend(triangle)
 
@@ -126,7 +130,7 @@ class Game(arcade.Window):
         color_list = []
 
         # Colors recalculation.
-        for cell in world_map.cells:
+        for cell in self.world_map.cells:
             if self.mod == 'tectonic':
                 color = 3 * [cell.tectonic_color]
             else:
@@ -136,6 +140,31 @@ class Game(arcade.Window):
         cells_grid = arcade.create_triangles_filled_with_colors(self.dot_list, color_list)
         self.cells.append(cells_grid)
 
+    def draw_player(self):
+        """ Draw player. """
+        # Draw circle
+        player = self.player
+        edge_size = 3*self.n
+        face_width, face_height = FACE_SIZE
+        cell_width = face_width / edge_size
+        cell_height = face_height / edge_size
+        arcade.draw_circle_filled(round(cell_width * (player.x / 2)),
+                                  round(cell_height * ((0.33 + 0.33 * (player.x % 2 == player.y % 2)) + player.y)),
+                                  3,
+                                  arcade.color.BLACK)
+        if self.display_player_coordinates:
+            # Draw numbers
+            arcade.draw_text(str(player.x) + ' ' + str(player.y),
+                             round(cell_width * (player.x / 2)),
+                             round(cell_height * (0.33 * (player.x % 2 == player.y % 2) + player.y) + 30),
+                             arcade.color.BLACK,
+                             17,
+                             bold=True,
+                             align="center",
+                             font_name=('Century Gothic', 'Arial'),
+                             anchor_x="center",
+                             anchor_y="center")
+
     def on_draw(self):
         # Visual part render.
         arcade.start_render()
@@ -144,7 +173,7 @@ class Game(arcade.Window):
 
         self.cells.draw()
         self.borders.draw()
-        self.player.draw()
+        self.draw_player()
 
         if self.debug_mod:
             output = f"{1/(self.draw_time+0.001):.0f} fps"
@@ -195,7 +224,7 @@ class Game(arcade.Window):
 
         # Tectonic Generation.
         if symbol == arcade.key.T:
-            world_map.tectonic_generation(TECTONIC_PLATES)
+            self.world_map.tectonic_generation(TECTONIC_PLATES)
             if self.mod == 'tectonic':
                 self.update_colors()
 
@@ -217,24 +246,25 @@ class Game(arcade.Window):
         if symbol in movement_keys:
             x = self.player.x
             y = self.player.y
+            directions = self.world_map.get_directions(x, y)
             if (x + y) % 2 == 0:
-                directions_by_key = (world_map.get_directions(x, y)[0],
+                directions_by_key = (directions[0],
                                      (0, 0),
-                                     world_map.get_directions(x, y)[1],
-                                     world_map.get_directions(x, y)[0],
-                                     world_map.get_directions(x, y)[1],
-                                     world_map.get_directions(x, y)[2],
-                                     world_map.get_directions(x, y)[2],
-                                     world_map.get_directions(x, y)[2])
+                                     directions[1],
+                                     directions[0],
+                                     directions[1],
+                                     directions[2],
+                                     directions[2],
+                                     directions[2])
             else:
-                directions_by_key = (world_map.get_directions(x, y)[2],
-                                     world_map.get_directions(x, y)[2],
-                                     world_map.get_directions(x, y)[2],
-                                     world_map.get_directions(x, y)[0],
-                                     world_map.get_directions(x, y)[1],
-                                     world_map.get_directions(x, y)[0],
+                directions_by_key = (directions[2],
+                                     directions[2],
+                                     directions[2],
+                                     directions[0],
+                                     directions[1],
+                                     directions[0],
                                      (0, 0),
-                                     world_map.get_directions(x, y)[1])
+                                     directions[1])
             direction_index = movement_keys.index(symbol)
             direction = directions_by_key[direction_index]
             self.player.move(*direction)
@@ -282,7 +312,7 @@ class Game(arcade.Window):
 
 def main():
     random.seed(SEED)
-    game = Game(SCREEN_WIDTH, SCREEN_HEIGHT)
+    game = Game(SCREEN_WIDTH, SCREEN_HEIGHT, N)
     game.setup()
     arcade.run()
 
