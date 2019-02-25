@@ -7,10 +7,13 @@ import TectonicPlate
 
 class WorldMap(Icosahedron.Icosahedron):
 
-    def __init__(self, n):
+    def __init__(self, n, tectonic_plates_count, seed):
         super().__init__(n, cell_class=Cell.Cell)
+        self.tectonic_plates_count = tectonic_plates_count
+        random.seed(seed)
 
-    def tectonic_generation(self, plate_count):
+    def tectonic_generation(self):
+        plate_count = self.tectonic_plates_count
         # already_in_plate - set of all marked cells (represented as coordinates tuples).
         already_in_plate = set()
         # border_cells - set of cells which have undistributed neighbours.
