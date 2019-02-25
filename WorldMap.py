@@ -1,57 +1,52 @@
 import random
 
-import Cell
-import Icosahedron
-import TectonicPlate
+from Cell import Cell
+from Icosahedron import Icosahedron
+from TectonicPlate import TectonicPlate
 
 
-class WorldMap(Icosahedron.Icosahedron):
+class WorldMap(Icosahedron):
 
     def __init__(self, n, tectonic_plates_count, seed):
-        super().__init__(n, cell_class=Cell.Cell)
+        super().__init__(n, cell_class=Cell)
         self.tectonic_plates_count = tectonic_plates_count
         random.seed(seed)
 
     def tectonic_generation(self):
         plate_count = self.tectonic_plates_count
-        # already_in_plate - set of all marked cells (represented as coordinates tuples).
-        already_in_plate = set()
-        # border_cells - set of cells which have undistributed neighbours.
-        border_cells = set()
-        # plates - list of TectonicPlates
-        plates = []
         # plate_centers consists of centers' coordinates tuples.
         plate_centers = random.sample(self.cells, plate_count)
-        plate_centers = map(lambda c: (c.x, c.y), plate_centers)
-        # Plate centers determination.
+        plate_centers = tuple(map(lambda c: (c.x, c.y), plate_centers))
+
+        # plates - list of TectonicPlates
+        plates = []
+
+        # plates initialization
         for plate_index, plate_center in enumerate(plate_centers):
-            new_plate = TectonicPlate.TectonicPlate(plate_index)
-            plates.append(new_plate)
-            new_plate.cells.add(plate_center)
-            new_plate.size += 1
+            new_plate = TectonicPlate(plate_index, self)
             new_plate.overgrowth_factor = random.random()/4*3 + 0.25
-            already_in_plate.add(plate_center)
-            border_cells.add(plate_center)
-            x, y = plate_center
-            self._map[x][y].plate = plate_index
-            self._map[x][y].tectonic_color = (100 + 1*plate_index, 100 + 1*plate_index, 100 + 1*plate_index)
+            new_plate.add_pos(plate_center)
+            plates.append(new_plate)
+
+        # already_in_plate - set of all marked cells (represented as coordinates tuples).
+        already_in_plate = set(plate_centers)
+        # border_cells - set of cells which have undistributed neighbours.
+        border_cells = set(plate_centers)
+
         # Other cells distribution.
-        while len(already_in_plate) != 180 * self.N ** 2:
+        while len(already_in_plate) != len(self.cells):
             for pos in tuple(border_cells):
-                cell_itself = self._map[pos[0]][pos[1]]
-                plate = cell_itself.plate
-                any_neighbours = False
-                for near_cell in self.near_cells(pos):
-                    near_pos = (near_cell.x, near_cell.y)
-                    if near_pos not in already_in_plate:
-                        any_neighbours = True
-                        if random.random() < plates[plate].overgrowth_factor:
-                            already_in_plate.add(near_pos)
-                            border_cells.add(near_pos)
-                            plates[plate].cells.add(near_pos)
-                            plates[plate].size += 1
-                            x, y = near_pos
-                            self._map[x][y].plate = plate
-                            self._map[x][y].tectonic_color = (100 + 1*plate, 100 + 1*plate, 100 + 1*plate)
-                if not any_neighbours:
+                plate_index = self[pos].plate
+                plate = plates[plate_index]
+                cells_near = self.near_cells(pos)
+                positions_near = map(lambda c: (c.x, c.y), cells_near)
+                positions_near = set(positions_near)
+                positions_near -= already_in_plate
+                for near_pos in tuple(positions_near):
+                    if random.random() < plate.overgrowth_factor:
+                        plate.add_pos(near_pos)
+                        already_in_plate.add(near_pos)
+                        border_cells.add(near_pos)
+                        positions_near.remove(near_pos)
+                if not positions_near:
                     border_cells.remove(pos)
