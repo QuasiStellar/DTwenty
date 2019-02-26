@@ -22,7 +22,7 @@ class Game(arcade.Window):
 
         # WorldMap object - main map.
         self.world_map = WorldMap.WorldMap(n, tectonic_plates_count, seed)
-        self.cells_on_edge = 3*n
+        self.cells_on_edge = 2 * 4**n + 1
 
         # Player object - a dot moving through the map.
         self.player = Player.Player(0, 0, self.world_map)
@@ -211,7 +211,7 @@ class Game(arcade.Window):
 
         # Coordinates.
         if symbol == arcade.key.S:
-            self.player.display_coordinates = not self.player.display_coordinates
+            self.display_player_coordinates = not self.display_player_coordinates
 
         # Movement.
         movement_keys = (
