@@ -1,9 +1,19 @@
 class TectonicPlate(object):
 
-    def __init__(self, number):
-        self.number = number
+    def __init__(self, index, world_map):
+        self.index = index
+        self.world_map = world_map
         self.direction = None
         self.velocity = None
         self.cells = set()
         self.overgrowth_factor = 1
-        self.size = 0
+
+    def add_pos(self, pos):
+        self.cells.add(pos)
+        cell = self.world_map[pos]
+        cell.plate = self.index
+        cell.tectonic_color = (100 + 1*self.index,) * 3
+
+    @property
+    def size(self):
+        return len(self.cells)

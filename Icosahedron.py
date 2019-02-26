@@ -21,6 +21,10 @@ class Icosahedron:
         cells = filter(lambda c: c is not None, cells)
         self.cells = tuple(cells)
 
+    def __getitem__(self, pos):
+        x, y = pos
+        return self._map[x][y]
+
     def __create_cell(self, x, y):
         """ Returns cell object for existing cells. """
         if self._pos_exists((x, y)):
