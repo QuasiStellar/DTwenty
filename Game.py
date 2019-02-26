@@ -22,7 +22,7 @@ class Game(arcade.Window):
 
         # WorldMap object - main map.
         self.world_map = WorldMap.WorldMap(n, tectonic_plates_count, seed)
-        self.cells_on_edge = 2 * 4**n + 1
+        self.cells_on_edge = self.world_map.cells_on_edge
 
         # Player object - a dot moving through the map.
         self.player = Player.Player(0, 0, self.world_map)

@@ -8,7 +8,7 @@ from TectonicPlate import TectonicPlate
 class WorldMap(Icosahedron):
 
     def __init__(self, n, tectonic_plates_count, seed):
-        super().__init__(n, cell_class=Cell)
+        super().__init__(cells_on_edge=2 * 4**n + 1, cell_class=Cell)
         self.tectonic_plates_count = tectonic_plates_count
         random.seed(seed)
 
