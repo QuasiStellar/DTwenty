@@ -7,10 +7,10 @@ import Game
 
 SEED = random.random()
 
-TECTONIC_PLATES = 20
+TECTONIC_PLATES = 7
 # Amount of plates into which we divide the map.
 
-N = 2
+N = 3
 # You can change this constant.
 # It determines an amount of cells on your map (2 * 4**N + 1 cells on one side).
 # Remember that quantity is proportional to the square of edge length.

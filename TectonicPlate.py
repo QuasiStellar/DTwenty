@@ -3,8 +3,6 @@ class TectonicPlate(object):
     def __init__(self, index, world_map):
         self.index = index
         self.world_map = world_map
-        self.direction = None
-        self.velocity = None
         self.cells = set()
         self.overgrowth_factor = 1
 
@@ -12,7 +10,7 @@ class TectonicPlate(object):
         self.cells.add(pos)
         cell = self.world_map[pos]
         cell.plate = self.index
-        cell.tectonic_color = (100 + 1*self.index,) * 3
+        cell.tectonic_color = (100 + 30 * self.index,) * 3
 
     @property
     def size(self):

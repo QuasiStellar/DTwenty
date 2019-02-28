@@ -1,5 +1,4 @@
 import itertools
-import timeit
 
 import arcade
 
@@ -32,9 +31,6 @@ class Game(arcade.Window):
 
         # ShapeElementList object for cells drawing. See setup() & update_colors()
         self.cells = None
-
-        # Time tracking.
-        self.draw_time = 0
 
         self.hints_on = False
         self.hints_notification = True
@@ -149,17 +145,12 @@ class Game(arcade.Window):
 
         # Visual part render.
         arcade.start_render()
-        # Timer zeroing.
-        draw_start_time = timeit.default_timer()
 
         self.cells.draw()
         self.borders.draw()
         self.draw_player()
 
         if self.debug_mod:
-            output = f"{1/(self.draw_time+0.001):.0f} fps"
-            arcade.draw_text(output, 20, screen_height - 40, arcade.color.WHITE, 18,
-                             font_name=('Century Gothic', 'Arial'))
             arcade.draw_text(VERSION, 230, screen_height - 40, arcade.color.WHITE, 18,
                              font_name=('Century Gothic', 'Arial'))
             arcade.draw_text('Mod: ' + self.mod, 500, screen_height - 40, arcade.color.WHITE, 18,
@@ -171,11 +162,6 @@ class Game(arcade.Window):
 
         if self.hints_on:
             self.draw_hints_window()
-
-        self.draw_time = timeit.default_timer() - draw_start_time
-
-    def update(self, delta_time):
-        pass
 
     def on_key_press(self, symbol, modifiers: int):
         """ Input treatment. """
