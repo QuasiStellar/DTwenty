@@ -10,6 +10,7 @@ class WorldMap(Icosahedron):
     def __init__(self, n, tectonic_plates_count, seed):
         super().__init__(cells_on_edge=2**n, cell_class=Cell)
         self.tectonic_plates_count = tectonic_plates_count
+        # TODO: localize
         random.seed(seed)
 
     def tectonic_generation(self):
@@ -38,10 +39,10 @@ class WorldMap(Icosahedron):
             for pos in tuple(border_cells):
                 plate_index = self[pos].plate
                 plate = plates[plate_index]
-                cells_near = self.near_cells(pos)
-                positions_near = map(lambda c: (c.x, c.y), cells_near)
+                positions_near = self.get_positions_near(*pos)
                 positions_near = set(positions_near)
-                positions_near = positions_near - already_in_plate  # difference_update is slower than difference there
+                # difference_update is slower than difference there
+                positions_near = positions_near - already_in_plate
                 for near_pos in tuple(positions_near):
                     if random.random() < plate.overgrowth_factor:
                         plate.add_pos(near_pos)

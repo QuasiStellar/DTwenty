@@ -49,18 +49,19 @@ class Icosahedron:
         max_y = 2*face_height + relative_y_border - 1
         return min_y <= y <= max_y
 
-    def get_directions(self, x, y):
+    def get_positions_near(self, x, y):
         """ Returns tuple of possible directions. """
         pos = (x, y)
         if not self._pos_exists(pos):
             raise IndexError
-        left = (-1, 0)
-        right = (1, 0)
+        width = self.size.x
+        left = ((x-1) % width, y)
+        right = ((x+1) % width, y)
         horizontal_side_up = (x + y) % 2 == 0
         if horizontal_side_up:
-            middle = (0, 1)
+            middle = (x, y+1)
         else:
-            middle = (0, -1)
+            middle = (x, y-1)
         face_height = self.cells_on_edge
         yy = y % face_height
         if y < face_height:
@@ -69,16 +70,14 @@ class Icosahedron:
             border_distance = 2 * (yy + 1)
         else:
             border_distance = None
-        sum_points = lambda a, b: ((a[0] + b[0]) % self.size.x, a[1] + b[1])
-        if not self._pos_exists(sum_points(pos, left)):
-            left = (-border_distance, 0)
-        if not self._pos_exists(sum_points(pos, right)):
-            right = (+border_distance, 0)
+        if not self._pos_exists(left):
+            left = ((x-border_distance) % width, y)
+        if not self._pos_exists(right):
+            right = ((x+border_distance) % width, y)
         return _Directions(left=left, right=right, middle=middle)
 
     def near_cells(self, coord):
         """ Returns tuple of adjacent cells. """
-        directions = self.get_directions(*coord)
-        positions_near = map(lambda d: ((coord[0]+d[0]) % self.size.x, coord[1]+d[1]), directions)
-        cells_near = map(lambda pos: self._map[pos[0]][pos[1]], positions_near)
+        positions_near = self.get_positions_near(*coord)
+        cells_near = map(lambda pos: self[pos], positions_near)
         return tuple(cells_near)
