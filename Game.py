@@ -214,24 +214,25 @@ class Game(arcade.Window):
             x = self.player.x
             y = self.player.y
             directions = self.world_map.get_directions(x, y)
-            if (x + y) % 2 == 0:
-                directions_by_key = (directions[0],
+            horizontal_side_up = (x + y) % 2 == 0
+            if horizontal_side_up:
+                directions_by_key = (directions.left,
                                      (0, 0),
-                                     directions[1],
-                                     directions[0],
-                                     directions[1],
-                                     directions[2],
-                                     directions[2],
-                                     directions[2])
+                                     directions.right,
+                                     directions.left,
+                                     directions.right,
+                                     directions.medium,
+                                     directions.medium,
+                                     directions.medium)
             else:
-                directions_by_key = (directions[2],
-                                     directions[2],
-                                     directions[2],
-                                     directions[0],
-                                     directions[1],
-                                     directions[0],
+                directions_by_key = (directions.medium,
+                                     directions.medium,
+                                     directions.medium,
+                                     directions.left,
+                                     directions.right,
+                                     directions.left,
                                      (0, 0),
-                                     directions[1])
+                                     directions.right)
             direction_index = movement_keys.index(symbol)
             direction = directions_by_key[direction_index]
             self.player.move(*direction)

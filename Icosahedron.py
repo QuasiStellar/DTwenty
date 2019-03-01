@@ -3,6 +3,7 @@ import itertools
 
 
 _Size = collections.namedtuple("Size", "x y")
+_Directions = collections.namedtuple("Directions", "left right medium")
 
 
 class Icosahedron:
@@ -72,7 +73,7 @@ class Icosahedron:
             left = (-border_distance, 0)
         if not self._pos_exists(sum_points(pos, right)):
             right = (+border_distance, 0)
-        return (left, right, medium)
+        return _Directions(left=left, right=right, medium=medium)
 
     def near_cells(self, coord):
         """ Returns tuple of adjacent cells. """
