@@ -7,6 +7,7 @@ _Directions = collections.namedtuple("Directions", "left right middle")
 
 
 class Icosahedron:
+
     def __init__(self, cells_on_edge, cell_class):
         self.cells_on_edge = cells_on_edge
         self._cell_class = cell_class
