@@ -17,7 +17,6 @@ class WorldMap(Icosahedron):
         plate_count = self.tectonic_plates_count
         # plate_centers consists of centers' coordinates tuples
         plate_centers = random.sample(self.cells, plate_count)
-        plate_centers = tuple(map(lambda c: (c.x, c.y), plate_centers))
 
         # plates - list of TectonicPlates
         plates = []
@@ -26,7 +25,7 @@ class WorldMap(Icosahedron):
         for plate_index, plate_center in enumerate(plate_centers):
             new_plate = TectonicPlate(plate_index, self)
             new_plate.overgrowth_factor = random.random()/4*3 + 0.25  # 0.25 - 0.75
-            new_plate.add_pos(plate_center)
+            new_plate.add_cell(plate_center)
             plates.append(new_plate)
 
         # already_in_plate - set of all marked cells (represented as coordinates tuples)
@@ -36,18 +35,18 @@ class WorldMap(Icosahedron):
 
         # Other cells distribution.
         while len(already_in_plate) != len(self.cells):
-            for pos in tuple(border_cells):
-                plate_index = self[pos].plate
+            for cell in tuple(border_cells):
+                plate_index = cell.plate
                 plate = plates[plate_index]
-                positions_near = self.get_positions_near(*pos)
-                positions_near = set(positions_near)
+                cells_near = self.get_cells_near(cell)
+                cells_near = set(cells_near)
                 # difference_update is slower than difference there
-                positions_near = positions_near - already_in_plate
-                for near_pos in tuple(positions_near):
+                cells_near = cells_near - already_in_plate
+                for near_cell in tuple(cells_near):
                     if random.random() < plate.overgrowth_factor:
-                        plate.add_pos(near_pos)
-                        already_in_plate.add(near_pos)
-                        border_cells.add(near_pos)
-                        positions_near.remove(near_pos)
-                if not positions_near:
-                    border_cells.remove(pos)
+                        plate.add_cell(near_cell)
+                        already_in_plate.add(near_cell)
+                        border_cells.add(near_cell)
+                        cells_near.remove(near_cell)
+                if not cells_near:
+                    border_cells.remove(cell)

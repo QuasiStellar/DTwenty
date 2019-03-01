@@ -76,8 +76,8 @@ class Icosahedron:
             right = ((x+border_distance) % width, y)
         return _Directions(left=left, right=right, middle=middle)
 
-    def near_cells(self, coord):
+    def get_cells_near(self, cell):
         """ Returns tuple of adjacent cells. """
-        positions_near = self.get_positions_near(*coord)
+        positions_near = self.get_positions_near(cell.x, cell.y)
         cells_near = map(lambda pos: self[pos], positions_near)
         return tuple(cells_near)
