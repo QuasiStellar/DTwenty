@@ -221,13 +221,13 @@ class Game(arcade.Window):
                                      directions.right,
                                      directions.left,
                                      directions.right,
-                                     directions.medium,
-                                     directions.medium,
-                                     directions.medium)
+                                     directions.middle,
+                                     directions.middle,
+                                     directions.middle)
             else:
-                directions_by_key = (directions.medium,
-                                     directions.medium,
-                                     directions.medium,
+                directions_by_key = (directions.middle,
+                                     directions.middle,
+                                     directions.middle,
                                      directions.left,
                                      directions.right,
                                      directions.left,
