@@ -3,6 +3,7 @@ import itertools
 
 
 _Size = collections.namedtuple("Size", "x y")
+_Directions = collections.namedtuple("Directions", "left right middle")
 
 
 class Icosahedron:
@@ -50,37 +51,30 @@ class Icosahedron:
 
     def get_directions(self, x, y):
         """ Returns tuple of possible directions. """
-        edge_size = self.cells_on_edge
-        xx = x % (2*edge_size)
-        yy = y % (2*edge_size)
-        if (x + y) % 2 == 0:
-            if y == 0:
-                return [(-2*edge_size, 0),
-                        (2*edge_size, 0),
-                        (0, 1)]
-            if xx == yy and y < edge_size:
-                return [(-1, 0),
-                        (2*(edge_size-yy), 0),
-                        (0, 1)]
-            if (2*edge_size - xx) == yy and y < edge_size:
-                return [(-2*(edge_size-yy), 0),
-                        (1, 0),
-                        (0, 1)]
-            return [(-1, 0), (1, 0), (0, 1)]
+        pos = (x, y)
+        if not self._pos_exists(pos):
+            raise IndexError
+        left = (-1, 0)
+        right = (1, 0)
+        horizontal_side_up = (x + y) % 2 == 0
+        if horizontal_side_up:
+            middle = (0, 1)
         else:
-            if y == 3*edge_size - 1:
-                return [(-2*edge_size, 0),
-                        (2*edge_size, 0),
-                        (0, -1)]
-            if xx-1 == yy and y >= 2*edge_size:
-                return [(-2*(yy+1), 0),
-                        (1, 0),
-                        (0, -1)]
-            if (2*edge_size - xx - 1) == yy and y >= 2*edge_size:
-                return [(-1, 0),
-                        (2 * (yy + 1), 0),
-                        (0, -1)]
-            return [(-1, 0), (1, 0), (0, -1)]
+            middle = (0, -1)
+        face_height = self.cells_on_edge
+        yy = y % face_height
+        if y < face_height:
+            border_distance = 2 * (face_height - yy)
+        elif y >= 2*face_height:
+            border_distance = 2 * (yy + 1)
+        else:
+            border_distance = None
+        sum_points = lambda a, b: ((a[0] + b[0]) % self.size.x, a[1] + b[1])
+        if not self._pos_exists(sum_points(pos, left)):
+            left = (-border_distance, 0)
+        if not self._pos_exists(sum_points(pos, right)):
+            right = (+border_distance, 0)
+        return _Directions(left=left, right=right, middle=middle)
 
     def near_cells(self, coord):
         """ Returns tuple of adjacent cells. """

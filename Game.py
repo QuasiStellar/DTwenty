@@ -200,41 +200,28 @@ class Game(arcade.Window):
             self.display_player_coordinates = not self.display_player_coordinates
 
         # Movement.
-        movement_keys = (
-            arcade.key.Z,
-            arcade.key.X,
-            arcade.key.C,
-            arcade.key.A,
-            arcade.key.D,
-            arcade.key.Q,
-            arcade.key.W,
-            arcade.key.E
-        )
-        if symbol in movement_keys:
-            x = self.player.x
-            y = self.player.y
-            directions = self.world_map.get_directions(x, y)
-            if (x + y) % 2 == 0:
-                directions_by_key = (directions[0],
-                                     (0, 0),
-                                     directions[1],
-                                     directions[0],
-                                     directions[1],
-                                     directions[2],
-                                     directions[2],
-                                     directions[2])
-            else:
-                directions_by_key = (directions[2],
-                                     directions[2],
-                                     directions[2],
-                                     directions[0],
-                                     directions[1],
-                                     directions[0],
-                                     (0, 0),
-                                     directions[1])
-            direction_index = movement_keys.index(symbol)
-            direction = directions_by_key[direction_index]
-            self.player.move(*direction)
+        keys = arcade.key
+        x = self.player.x
+        y = self.player.y
+        directions = self.world_map.get_directions(x, y)
+        # TODO: remove disclosure of Icosahedron secrets
+        horizontal_side_up = (x + y) % 2 == 0
+        if horizontal_side_up:
+            directions_by_keys = {
+                (keys.Z, keys.A): directions.left,
+                (keys.C, keys.D): directions.right,
+                (keys.Q, keys.W, keys.E): directions.middle
+            }
+        else:
+            directions_by_keys = {
+                (keys.A, keys.Q): directions.left,
+                (keys.D, keys.E): directions.right,
+                (keys.Z, keys.X, keys.C): directions.middle
+            }
+        for key_set in directions_by_keys.keys():
+            if symbol in key_set:
+                direction = directions_by_keys[key_set]
+                self.player.move(*direction)
 
     def draw_hints_window(self):
         """ Hints window drawing """
