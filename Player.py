@@ -5,7 +5,7 @@ class Player(object):
         self.y = y
         self.world_map = world_map
 
-    def move(self, dx, dy):
+    def move_to(self, x, y):
         """ Move player. """
-        self.x = (self.x + dx) % self.world_map.size.x
-        self.y += dy
+        self.x = x
+        self.y = y
