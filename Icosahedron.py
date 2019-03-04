@@ -29,7 +29,7 @@ class Icosahedron:
     def __create_cell(self, x, y):
         """ Returns cell object for existing cells. """
         if self._pos_exists((x, y)):
-            return self._cell_class(x, y)
+            return self._cell_class(x, y, world_map=self)
         else:
             return None
 
