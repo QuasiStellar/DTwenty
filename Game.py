@@ -3,7 +3,7 @@ import itertools
 import arcade
 
 import Player
-import WorldMap
+import world_map.WorldMap as WorldMap
 
 VERSION = "alpha-0.3"
 SCREEN_TITLE = "D20"

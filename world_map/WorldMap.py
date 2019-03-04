@@ -1,9 +1,9 @@
 from collections import deque
 from random import Random
 
-from Cell import Cell
-from Icosahedron import Icosahedron
-from TectonicPlate import TectonicPlate
+from world_map.Cell import Cell
+from world_map.Icosahedron import Icosahedron
+from world_map.TectonicPlate import TectonicPlate
 
 
 class WorldMap(Icosahedron):
