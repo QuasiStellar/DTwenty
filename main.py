@@ -12,7 +12,7 @@ TECTONIC_PLATES = 7
 
 N = 3
 # You can change this constant.
-# It determines an amount of cells on your map (2 * 4**N + 1 cells on one side).
+# It determines an amount of cells on your map (2**N cells on one side).
 # Remember that quantity is proportional to the square of edge length.
 # Huge values can cause lags and Memory Error (N>3)
 
