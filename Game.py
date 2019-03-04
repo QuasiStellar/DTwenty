@@ -11,7 +11,7 @@ SCREEN_TITLE = "D20"
 
 class Game(arcade.Window):
 
-    def __init__(self, n, tectonic_plates_count, seed):
+    def __init__(self, n, tectonic_plates_count, submergence, seed):
         # Size of the default window.
         self.SCREEN_WIDTH = 1500
         self.SCREEN_HEIGHT = 780
@@ -20,7 +20,7 @@ class Game(arcade.Window):
         super().__init__(self.SCREEN_WIDTH, self.SCREEN_HEIGHT, SCREEN_TITLE, fullscreen=False)
 
         # WorldMap object - main map.
-        self.world_map = WorldMap.WorldMap(n, tectonic_plates_count, seed)
+        self.world_map = WorldMap.WorldMap(n, tectonic_plates_count, submergence, seed)
         self.cells_on_edge = self.world_map.cells_on_edge
 
         # Player object - a dot moving through the map.

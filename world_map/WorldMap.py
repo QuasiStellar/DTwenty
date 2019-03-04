@@ -8,11 +8,12 @@ from world_map.TectonicPlate import TectonicPlate
 
 class WorldMap(Icosahedron):
 
-    def __init__(self, n, tectonic_plates_count, seed):
+    def __init__(self, n, tectonic_plates_count, submergence, seed):
         # TODO: split logic and output
         self.color_random = Random(seed)
         super().__init__(cells_on_edge=2**n, cell_class=Cell)
         self.tectonic_plates_count = tectonic_plates_count
+        self.submergence = submergence
         self.random = Random(seed)
 
     def tectonic_generation(self):

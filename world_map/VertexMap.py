@@ -9,12 +9,14 @@ class VertexMap(object):
                             for x in range(x_size)]
 
     def __real_y(self, x, imaginary_y):
+        """ Find real vertex height based on vertex_list height. """
         edge = self.cells_on_edge
         xx = x % (edge * 2)
         bottom_indent = min(xx, 2 * edge - xx)
         return bottom_indent + imaginary_y * 2
 
     def __imaginary_y(self, x, real_y):
+        """ Find vertex_list height based on real vertex height. """
         edge = self.cells_on_edge
         xx = x % (edge * 2)
         bottom_indent = min(xx, 2 * edge - xx)

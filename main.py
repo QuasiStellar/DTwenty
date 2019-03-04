@@ -10,6 +10,9 @@ SEED = random.random()
 TECTONIC_PLATES = 7
 # Amount of plates into which we divide the map.
 
+SUBMERGENCE = 0.5
+# Which part of tectonic plates should be oceanic.
+
 N = 3
 # You can change this constant.
 # It determines an amount of cells on your map (2**N cells on one side).
@@ -18,7 +21,7 @@ N = 3
 
 
 def main():
-    game = Game.Game(n=N, tectonic_plates_count=TECTONIC_PLATES, seed=SEED)
+    game = Game.Game(n=N, tectonic_plates_count=TECTONIC_PLATES, submergence=SUBMERGENCE, seed=SEED)
     game.setup()
     arcade.run()
 
