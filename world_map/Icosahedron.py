@@ -3,6 +3,7 @@ import itertools
 
 
 _Size = collections.namedtuple("Size", "x y")
+_Directions = collections.namedtuple("Directions", "left right middle")
 
 
 class Icosahedron:
@@ -28,7 +29,7 @@ class Icosahedron:
     def __create_cell(self, x, y):
         """ Returns cell object for existing cells. """
         if self._pos_exists((x, y)):
-            return self._cell_class(x, y)
+            return self._cell_class(x, y, world_map=self)
         else:
             return None
 
@@ -48,43 +49,35 @@ class Icosahedron:
         max_y = 2*face_height + relative_y_border - 1
         return min_y <= y <= max_y
 
-    def get_directions(self, x, y):
+    def get_positions_near(self, x, y):
         """ Returns tuple of possible directions. """
-        edge_size = self.cells_on_edge
-        xx = x % (2*edge_size)
-        yy = y % (2*edge_size)
-        if (x + y) % 2 == 0:
-            if y == 0:
-                return [(-2*edge_size, 0),
-                        (2*edge_size, 0),
-                        (0, 1)]
-            if xx == yy and y < edge_size:
-                return [(-1, 0),
-                        (2*(edge_size-yy), 0),
-                        (0, 1)]
-            if (2*edge_size - xx) == yy and y < edge_size:
-                return [(-2*(edge_size-yy), 0),
-                        (1, 0),
-                        (0, 1)]
-            return [(-1, 0), (1, 0), (0, 1)]
+        pos = (x, y)
+        if not self._pos_exists(pos):
+            raise IndexError
+        width = self.size.x
+        left = ((x-1) % width, y)
+        right = ((x+1) % width, y)
+        horizontal_side_up = (x + y) % 2 == 0
+        if horizontal_side_up:
+            middle = (x, y+1)
         else:
-            if y == 3*edge_size - 1:
-                return [(-2*edge_size, 0),
-                        (2*edge_size, 0),
-                        (0, -1)]
-            if xx-1 == yy and y >= 2*edge_size:
-                return [(-2*(yy+1), 0),
-                        (1, 0),
-                        (0, -1)]
-            if (2*edge_size - xx - 1) == yy and y >= 2*edge_size:
-                return [(-1, 0),
-                        (2 * (yy + 1), 0),
-                        (0, -1)]
-            return [(-1, 0), (1, 0), (0, -1)]
+            middle = (x, y-1)
+        face_height = self.cells_on_edge
+        yy = y % face_height
+        if y < face_height:
+            border_distance = 2 * (face_height - yy)
+        elif y >= 2*face_height:
+            border_distance = 2 * (yy + 1)
+        else:
+            border_distance = None
+        if not self._pos_exists(left):
+            left = ((x-border_distance) % width, y)
+        if not self._pos_exists(right):
+            right = ((x+border_distance) % width, y)
+        return _Directions(left=left, right=right, middle=middle)
 
-    def near_cells(self, coord):
+    def get_cells_near(self, cell):
         """ Returns tuple of adjacent cells. """
-        directions = self.get_directions(*coord)
-        positions_near = map(lambda d: ((coord[0]+d[0]) % self.size.x, coord[1]+d[1]), directions)
-        cells_near = map(lambda pos: self._map[pos[0]][pos[1]], positions_near)
+        positions_near = self.get_positions_near(cell.x, cell.y)
+        cells_near = map(lambda pos: self[pos], positions_near)
         return tuple(cells_near)

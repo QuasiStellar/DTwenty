@@ -3,7 +3,7 @@ import itertools
 import arcade
 
 import Player
-import WorldMap
+import world_map.WorldMap as WorldMap
 
 VERSION = "alpha-0.3"
 SCREEN_TITLE = "D20"
@@ -200,41 +200,28 @@ class Game(arcade.Window):
             self.display_player_coordinates = not self.display_player_coordinates
 
         # Movement.
-        movement_keys = (
-            arcade.key.Z,
-            arcade.key.X,
-            arcade.key.C,
-            arcade.key.A,
-            arcade.key.D,
-            arcade.key.Q,
-            arcade.key.W,
-            arcade.key.E
-        )
-        if symbol in movement_keys:
-            x = self.player.x
-            y = self.player.y
-            directions = self.world_map.get_directions(x, y)
-            if (x + y) % 2 == 0:
-                directions_by_key = (directions[0],
-                                     (0, 0),
-                                     directions[1],
-                                     directions[0],
-                                     directions[1],
-                                     directions[2],
-                                     directions[2],
-                                     directions[2])
-            else:
-                directions_by_key = (directions[2],
-                                     directions[2],
-                                     directions[2],
-                                     directions[0],
-                                     directions[1],
-                                     directions[0],
-                                     (0, 0),
-                                     directions[1])
-            direction_index = movement_keys.index(symbol)
-            direction = directions_by_key[direction_index]
-            self.player.move(*direction)
+        keys = arcade.key
+        x = self.player.x
+        y = self.player.y
+        neighbors = self.world_map.get_positions_near(x, y)
+        # TODO: remove disclosure of Icosahedron secrets
+        horizontal_side_up = (x + y) % 2 == 0
+        if horizontal_side_up:
+            neighbors_by_keys = {
+                (keys.Z, keys.A): neighbors.left,
+                (keys.C, keys.D): neighbors.right,
+                (keys.Q, keys.W, keys.E): neighbors.middle
+            }
+        else:
+            neighbors_by_keys = {
+                (keys.A, keys.Q): neighbors.left,
+                (keys.D, keys.E): neighbors.right,
+                (keys.Z, keys.X, keys.C): neighbors.middle
+            }
+        for key_set in neighbors_by_keys.keys():
+            if symbol in key_set:
+                neighbor = neighbors_by_keys[key_set]
+                self.player.move_to(*neighbor)
 
     def draw_hints_window(self):
         """ Hints window drawing """
