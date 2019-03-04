@@ -36,6 +36,12 @@ class VertexMap(object):
         y = self.__imaginary_y(x, real_y)
         return self.vertex_list[x][y]
 
+    def define_angular_vertexes(self):
+        pass
+
+    def emerald(self, ver_a, ver_b, ver_c):
+        pass
+
     @staticmethod
     def vertexes_by_cell():
         pass
