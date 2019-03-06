@@ -13,11 +13,10 @@ TECTONIC_PLATES = 7
 SUBMERGENCE = 0.5
 # Which part of tectonic plates should be oceanic.
 
-N = 3
-# You can change this constant.
-# It determines an amount of cells on your map (2**N cells on one side).
+N = 6
+# N determines an amount of cells on your map (2**N cells on one side).
 # Remember that quantity is proportional to the square of edge length.
-# Huge values can cause lags and Memory Error (N>3)
+# Huge values can cause lags and Memory Error (N>6)
 
 
 def main():

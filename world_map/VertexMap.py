@@ -25,20 +25,11 @@ class VertexMap(object):
         bottom_indent = min(xx, 2 * edge - xx)
         return (real_y - bottom_indent) // 2
 
-    def __real_y_coordinate(self, vertex):
-        """ Returns real vertex coordinates. """
-        x = vertex.x
-        y = vertex.y
-        # consider that vertexes are on the same line and have even distance between them
-        real_y = self.__real_y(x, y)
-        real_coordinate = real_y
-        return real_coordinate
-
     def __distance(self, ver_a, ver_b):
         """ Returns distance between two vertexes. """
         x1 = ver_a.x
         x2 = ver_b.x
-        real_y1, real_y2 = self.__real_y_coordinate(ver_a), self.__real_y_coordinate(ver_b)
+        real_y1, real_y2 = self.__real_y(ver_a.x, ver_a.y), self.__real_y(ver_b.x, ver_b.y)
         if real_y1 == real_y2:
             return abs(x1 - x2) // 2
         else:
@@ -48,7 +39,7 @@ class VertexMap(object):
         """ Returns a vertex between two given. """
         x1 = ver_a.x
         x2 = ver_b.x
-        real_y1, real_y2 = self.__real_y_coordinate(ver_a), self.__real_y_coordinate(ver_b)
+        real_y1, real_y2 = self.__real_y(x1, ver_a.y), self.__real_y(x2, ver_b.y)
         real_y = (real_y1 + real_y2) // 2
         x = (x1 + x2) // 2
         y = self.__imaginary_y(x, real_y)
@@ -58,18 +49,32 @@ class VertexMap(object):
         pass
 
     def emerald(self, ver_a, ver_b, ver_c):
+        """ Find all vertexes' height. """
         ver_ab = self.__middle(ver_a, ver_b)
         ver_bc = self.__middle(ver_b, ver_c)
         ver_ac = self.__middle(ver_a, ver_c)
-        sigma = self.__distance(ver_a, ver_b) / self.cells_on_edge
+        distance = self.__distance(ver_a, ver_b)
+        sigma = distance / self.cells_on_edge
         ver_ab.height = (ver_a.height + ver_b.height) / 2 + self.random.gauss(0, sigma)
         ver_bc.height = (ver_b.height + ver_c.height) / 2 + self.random.gauss(0, sigma)
         ver_ac.height = (ver_a.height + ver_c.height) / 2 + self.random.gauss(0, sigma)
-        self.emerald(ver_a, ver_ab, ver_ac)
-        self.emerald(ver_b, ver_ab, ver_bc)
-        self.emerald(ver_c, ver_bc, ver_ac)
-        self.emerald(ver_ab, ver_bc, ver_ac)
+        if distance != 2:
+            self.emerald(ver_a, ver_ab, ver_ac)
+            self.emerald(ver_b, ver_ab, ver_bc)
+            self.emerald(ver_c, ver_bc, ver_ac)
+            self.emerald(ver_ab, ver_bc, ver_ac)
 
-    @staticmethod
-    def vertexes_by_cell():
-        pass
+    def vertical_vertex(self, cell):
+        if cell.up_side_down:
+            return self.vertex_list[cell.x][self.__imaginary_y(cell.x, cell.y)]
+        else:
+            return self.vertex_list[cell.x][self.__imaginary_y(cell.x, cell.y + 1)]
+
+    def vertexes_by_cell(self, cell):
+        x = cell.x
+        y = cell.y
+        if cell.up_side_down:
+            # TODO: undone!
+            return self.vertical_vertex(cell), self.vertical_vertex(cell), self.vertical_vertex(cell)
+        else:
+            return self.vertical_vertex(cell), self.vertical_vertex(cell), self.vertical_vertex(cell)

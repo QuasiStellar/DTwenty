@@ -16,3 +16,5 @@ class Cell(object):
         self.color = (random_color, random_color, random_color)
 
         self.tectonic_color = self.color
+
+        self.height_color = self.color
