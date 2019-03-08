@@ -64,17 +64,15 @@ class VertexMap(object):
             self.emerald(ver_c, ver_bc, ver_ac)
             self.emerald(ver_ab, ver_bc, ver_ac)
 
-    def vertical_vertex(self, cell):
-        if cell.up_side_down:
-            return self.vertex_list[cell.x][self.__imaginary_y(cell.x, cell.y)]
-        else:
-            return self.vertex_list[cell.x][self.__imaginary_y(cell.x, cell.y + 1)]
-
     def vertexes_by_cell(self, cell):
         x = cell.x
         y = cell.y
         if cell.up_side_down:
-            # TODO: undone!
-            return self.vertical_vertex(cell), self.vertical_vertex(cell), self.vertical_vertex(cell)
+            vertical_vertex = self.vertex_list[cell.x][self.__imaginary_y(cell.x, cell.y)]
+            left_vertex = self.vertex_list[cell.x - 1][self.__imaginary_y(cell.x - 1, cell.y + 1)]
+            right_vertex = self.vertex_list[cell.x + 1][self.__imaginary_y(cell.x + 1, cell.y + 1)]
         else:
-            return self.vertical_vertex(cell), self.vertical_vertex(cell), self.vertical_vertex(cell)
+            vertical_vertex = self.vertex_list[cell.x][self.__imaginary_y(cell.x, cell.y + 1)]
+            left_vertex = self.vertex_list[cell.x - 1][self.__imaginary_y(cell.x - 1, cell.y - 1)]
+            right_vertex = self.vertex_list[cell.x + 1][self.__imaginary_y(cell.x + 1, cell.y - 1)]
+        return vertical_vertex, left_vertex, right_vertex
