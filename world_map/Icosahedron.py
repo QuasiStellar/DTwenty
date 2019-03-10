@@ -15,7 +15,7 @@ class Icosahedron:
         y_size = 3*self.cells_on_edge
         self.size = _Size(x_size, y_size)
         # map - 2-dim list of existing cells
-        self._map = [[self.__create_cell(x, y) for y in range(y_size)]
+        self._map = [[self.__create_cell((x, y)) for y in range(y_size)]
                      for x in range(x_size)]
         # cells - tuple of all cells.
         cells = itertools.chain(*self._map)  # join columns
@@ -26,10 +26,10 @@ class Icosahedron:
         x, y = pos
         return self._map[x][y]
 
-    def __create_cell(self, x, y):
+    def __create_cell(self, pos):
         """ Returns cell object for existing cells. """
-        if self._pos_exists((x, y)):
-            return self._cell_class(x, y, world_map=self)
+        if self._pos_exists(pos):
+            return self._cell_class(pos, world_map=self)
         else:
             return None
 

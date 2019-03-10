@@ -1,9 +1,14 @@
+from collections import namedtuple
+
+
+_Pos = namedtuple("Pos", "x y")
+
+
 class Cell(object):
 
-    def __init__(self, x, y, *, world_map):
+    def __init__(self, pos, *, world_map):
         self.world_map = world_map
-        self.x = x
-        self.y = y
+        self.pos = _Pos(*pos)
         self.type = 0
         self.temperature = 0
         self.height = 0

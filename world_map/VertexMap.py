@@ -1,5 +1,6 @@
 from random import Random
 
+
 class VertexMap(object):
 
     def __init__(self, cells_on_edge, vertex_class, seed):
@@ -65,9 +66,8 @@ class VertexMap(object):
             self.emerald(ver_ab, ver_bc, ver_ac)
 
     def vertexes_by_cell(self, cell):
-        x = cell.x
-        y = cell.y
-        if cell.up_side_down:
+        world_map = cell.world_map
+        if world_map.is_upside_down(cell):
             vertical_vertex = self.vertex_list[cell.x][self.__imaginary_y(cell.x, cell.y)]
             left_vertex = self.vertex_list[cell.x - 1][self.__imaginary_y(cell.x - 1, cell.y + 1)]
             right_vertex = self.vertex_list[cell.x + 1][self.__imaginary_y(cell.x + 1, cell.y + 1)]

@@ -77,13 +77,14 @@ class Game(arcade.Window):
     def _get_triangle_vertices(self, cell, cell_width, cell_height):
         """ Returns tuple of vertex coordinates. """
         cell_upside_down = self.world_map.is_upside_down(cell)
-        down_y = cell.y
-        up_y = cell.y + 1
+        x, y = cell.pos
+        down_y = y
+        up_y = y + 1
         if cell_upside_down:
-            left_x = (cell.x - 1) // 2 + 0.5
+            left_x = (x - 1) // 2 + 0.5
         else:
-            left_x = cell.x // 2
-        if cell.y % 2 == 1:
+            left_x = x // 2
+        if y % 2 == 1:
             left_x -= 0.5
         middle_x = left_x + 0.5
         right_x = left_x + 1
@@ -125,8 +126,7 @@ class Game(arcade.Window):
     def _draw_player(self):
         """ Draw player. """
         # Draw circle
-        player = self.player
-        x, y = player.cell.x, player.cell.y
+        x, y = self.player.cell.pos
         cell_width, cell_height = self.cell_size_px
         arcade.draw_circle_filled(round(cell_width * (x / 2)),
                                   round(cell_height * ((0.33 + 0.33 * (x % 2 == y % 2)) + y)),
