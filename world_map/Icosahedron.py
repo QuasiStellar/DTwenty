@@ -51,7 +51,7 @@ class Icosahedron:
 
     def is_upside_down(self, cell):
         if isinstance(cell, self._cell_class):
-            x, y = cell.x, cell.y
+            x, y = cell.pos
         else:
             # TODO: replace positions with cells everywhere
             x, y = cell
