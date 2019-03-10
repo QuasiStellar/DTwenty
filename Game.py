@@ -76,7 +76,7 @@ class Game(arcade.Window):
         """ Returns tuple of vertex coordinates. """
         down_y = cell.y
         up_y = cell.y + 1
-        if cell.up_side_down:
+        if cell.upside_down:
             left_x = (cell.x - 1) // 2 + 0.5
         else:
             left_x = cell.x // 2
@@ -85,7 +85,7 @@ class Game(arcade.Window):
         middle_x = left_x + 0.5
         right_x = left_x + 1
         vertices_x = (left_x, right_x, middle_x)
-        if cell.up_side_down:
+        if cell.upside_down:
             vertices_y = (up_y, up_y, down_y)
         else:
             vertices_y = (down_y, down_y, up_y)
