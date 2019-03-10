@@ -13,7 +13,6 @@ class TectonicPlate(object):
     def add_cell(self, cell):
         self.cells.add(cell)
         cell.plate = self.index
-        cell.tectonic_color = (100 + 30 * self.index,) * 3
 
     @property
     def size(self):

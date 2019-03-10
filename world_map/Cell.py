@@ -18,7 +18,4 @@ class Cell(object):
         # random light-gray shade
         random_color = self.world_map.color_random.randint(128, 256)
         self.color = (random_color, random_color, random_color)
-
-        self.tectonic_color = self.color
-
         self.height_color = self.color

@@ -104,9 +104,14 @@ class Game(arcade.Window):
 
     def _get_cell_color(self, cell):
         if self.color_mode == "common":
-            return 3 * [cell.color]
+            return cell.color
         elif self.color_mode == "tectonic":
-            return 3 * [cell.tectonic_color]
+            min_color = 100
+            max_color = 255
+            max_plate_index = self.world_map.tectonic_plates_count - 1
+            k = cell.plate / max_plate_index
+            color = min_color + k*(max_color-min_color)
+            return (int(color),) * 3
         else:
             raise AssertionError("Color mode does not exist: %s" % self.color_mode)
 
@@ -117,7 +122,7 @@ class Game(arcade.Window):
         # Colors recalculation.
         for cell in self.world_map.cells:
             color = self._get_cell_color(cell)
-            color_list.extend(color)
+            color_list.extend(3 * [color])
 
         self._cells_grid_container = arcade.ShapeElementList()
         cells_grid = arcade.create_triangles_filled_with_colors(self._cells_vertices, color_list)
