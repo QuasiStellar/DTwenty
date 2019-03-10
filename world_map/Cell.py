@@ -13,9 +13,3 @@ class Cell(object):
         self.temperature = 0
         self.height = 0
         self.plate = None
-
-        # TODO: split logic and output
-        # random light-gray shade
-        random_color = self.world_map.color_random.randint(128, 256)
-        self.color = (random_color, random_color, random_color)
-        self.height_color = self.color

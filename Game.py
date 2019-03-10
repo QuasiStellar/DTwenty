@@ -1,4 +1,5 @@
 import itertools
+import random
 
 import arcade
 
@@ -24,6 +25,8 @@ class Game(arcade.Window):
         cells_on_edge = self.world_map.cells_on_edge
         face_width, face_height = self.FACE_SIZE
         self.cell_size_px = (face_width/cells_on_edge, face_height/cells_on_edge)
+
+        self._initialize_default_cells_colors()
 
         # Player object - a dot moving through the map.
         self.player = Player.Player(self.world_map[0, 0], world_map=self.world_map)
@@ -74,6 +77,14 @@ class Game(arcade.Window):
 
         self._update_cells_colors()
 
+    def _initialize_default_cells_colors(self):
+        self._default_cells_colors = {}
+        color_random = random.Random(self.world_map.seed)
+        # random light-gray shade
+        for cell in self.world_map.cells:
+            random_color = color_random.randint(128, 256)
+            self._default_cells_colors[cell] = (random_color,) * 3
+
     def _get_triangle_vertices(self, cell, cell_width, cell_height):
         """ Returns tuple of vertex coordinates. """
         cell_upside_down = self.world_map.is_upside_down(cell)
@@ -104,7 +115,7 @@ class Game(arcade.Window):
 
     def _get_cell_color(self, cell):
         if self.color_mode == "common":
-            return cell.color
+            return self._default_cells_colors[cell]
         elif self.color_mode == "tectonic":
             min_color = 100
             max_color = 255
@@ -112,6 +123,9 @@ class Game(arcade.Window):
             k = cell.plate.index / max_plate_index
             color = min_color + k*(max_color-min_color)
             return (int(color),) * 3
+        elif self.color_mode == "height":
+            # TODO
+            return self._default_cells_colors[cell]
         else:
             raise AssertionError("Color mode does not exist: %s" % self.color_mode)
 
