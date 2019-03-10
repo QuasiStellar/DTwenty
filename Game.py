@@ -73,12 +73,12 @@ class Game(arcade.Window):
 
         self._update_cells_colors()
 
-    @staticmethod
-    def _get_triangle_vertices(cell, cell_width, cell_height):
+    def _get_triangle_vertices(self, cell, cell_width, cell_height):
         """ Returns tuple of vertex coordinates. """
+        cell_upside_down = self.world_map.is_upside_down(cell)
         down_y = cell.y
         up_y = cell.y + 1
-        if cell.upside_down:
+        if cell_upside_down:
             left_x = (cell.x - 1) // 2 + 0.5
         else:
             left_x = cell.x // 2
@@ -87,7 +87,7 @@ class Game(arcade.Window):
         middle_x = left_x + 0.5
         right_x = left_x + 1
         vertices_x = (left_x, right_x, middle_x)
-        if cell.upside_down:
+        if cell_upside_down:
             vertices_y = (up_y, up_y, down_y)
         else:
             vertices_y = (down_y, down_y, up_y)
@@ -211,9 +211,8 @@ class Game(arcade.Window):
         x = self.player.x
         y = self.player.y
         neighbors = self.world_map.get_positions_near(x, y)
-        # TODO: remove disclosure of Icosahedron secrets
-        horizontal_side_up = (x + y) % 2 == 0
-        if horizontal_side_up:
+        cell_upside_down = self.world_map.is_upside_down((x, y))
+        if cell_upside_down:
             neighbors_by_keys = {
                 (keys.Z, keys.A): neighbors.left,
                 (keys.C, keys.D): neighbors.right,

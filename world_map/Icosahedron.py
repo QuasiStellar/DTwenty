@@ -49,6 +49,15 @@ class Icosahedron:
         max_y = 2*face_height + relative_y_border - 1
         return min_y <= y <= max_y
 
+    def is_upside_down(self, cell):
+        if isinstance(cell, self._cell_class):
+            x, y = cell.x, cell.y
+        else:
+            # TODO: replace positions with cells everywhere
+            x, y = cell
+        return (x + y) % 2 == 0
+
+    # TODO: remove or make private
     def get_positions_near(self, x, y):
         """ Returns tuple of possible directions. """
         pos = (x, y)
@@ -57,8 +66,8 @@ class Icosahedron:
         width = self.size.x
         left = ((x-1) % width, y)
         right = ((x+1) % width, y)
-        horizontal_side_up = (x + y) % 2 == 0
-        if horizontal_side_up:
+        cell_upside_down = self.is_upside_down(pos)
+        if cell_upside_down:
             middle = (x, y+1)
         else:
             middle = (x, y-1)

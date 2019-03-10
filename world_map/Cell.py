@@ -4,7 +4,6 @@ class Cell(object):
         self.world_map = world_map
         self.x = x
         self.y = y
-        self.upside_down = (x + y) % 2 == 0
         self.type = 0
         self.temperature = 0
         self.height = 0
