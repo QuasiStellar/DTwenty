@@ -26,7 +26,7 @@ class Game(arcade.Window):
         self.cell_size_px = (face_width/cells_on_edge, face_height/cells_on_edge)
 
         # Player object - a dot moving through the map.
-        self.player = Player.Player(0, 0, self.world_map)
+        self.player = Player.Player(self.world_map[0, 0], world_map=self.world_map)
 
         # ShapeElementList object for borders drawing. See setup()
         self._borders = None
@@ -126,16 +126,17 @@ class Game(arcade.Window):
         """ Draw player. """
         # Draw circle
         player = self.player
+        x, y = player.cell.x, player.cell.y
         cell_width, cell_height = self.cell_size_px
-        arcade.draw_circle_filled(round(cell_width * (player.x / 2)),
-                                  round(cell_height * ((0.33 + 0.33 * (player.x % 2 == player.y % 2)) + player.y)),
+        arcade.draw_circle_filled(round(cell_width * (x / 2)),
+                                  round(cell_height * ((0.33 + 0.33 * (x % 2 == y % 2)) + y)),
                                   3,
                                   arcade.color.BLACK)
         if self.display_player_coordinates:
             # Draw numbers
-            arcade.draw_text(str(player.x) + ' ' + str(player.y),
-                             round(cell_width * (player.x / 2)),
-                             round(cell_height * (0.33 * (player.x % 2 == player.y % 2) + player.y) + 30),
+            arcade.draw_text(str(x) + ' ' + str(y),
+                             round(cell_width * (x / 2)),
+                             round(cell_height * (0.33 * (x % 2 == y % 2) + y) + 30),
                              arcade.color.BLACK,
                              17,
                              bold=True,
@@ -207,10 +208,9 @@ class Game(arcade.Window):
 
         # Movement.
         keys = arcade.key
-        x = self.player.x
-        y = self.player.y
-        neighbors = self.world_map.get_positions_near(x, y)
-        cell_upside_down = self.world_map.is_upside_down((x, y))
+        cell = self.player.cell
+        neighbors = self.world_map.get_cells_near(cell)
+        cell_upside_down = self.world_map.is_upside_down(cell)
         if cell_upside_down:
             neighbors_by_keys = {
                 (keys.Z, keys.A): neighbors.left,
@@ -226,7 +226,7 @@ class Game(arcade.Window):
         for key_set in neighbors_by_keys.keys():
             if symbol in key_set:
                 neighbor = neighbors_by_keys[key_set]
-                self.player.move_to(*neighbor)
+                self.player.move_to(neighbor)
 
     def _draw_hints_window(self):
         """ Hints window drawing """
