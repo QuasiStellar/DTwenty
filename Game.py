@@ -1,4 +1,5 @@
 import itertools
+import random
 
 import arcade
 
@@ -21,26 +22,32 @@ class Game(arcade.Window):
 
         # WorldMap object - main map.
         self.world_map = WorldMap.WorldMap(n, tectonic_plates_count, submergence, seed)
-        self.cells_on_edge = self.world_map.cells_on_edge
+        cells_on_edge = self.world_map.cells_on_edge
+        face_width, face_height = self.FACE_SIZE
+        self.cell_size_px = (face_width/cells_on_edge, face_height/cells_on_edge)
+
+        self._initialize_default_cells_colors()
 
         # Player object - a dot moving through the map.
-        self.player = Player.Player(0, 0, self.world_map)
+        self.player = Player.Player(self.world_map[0, 0], world_map=self.world_map)
 
         # ShapeElementList object for borders drawing. See setup()
-        self.borders = None
+        self._borders = None
 
-        # ShapeElementList object for cells drawing. See setup() & update_colors()
-        self.cells = None
+        # ShapeElementList object for cells drawing. See setup() & _update_cells_colors()
+        self._cells_grid_container = None
+
+        self.tectonic_plates_generated = False
 
         self.hints_on = False
         self.hints_notification = True
-        self.debug_mod = False
+        self.debug_mode = False
         self.display_player_coordinates = None
 
-        self.mod = 'common'
+        self.color_mode = 'common'
 
         # List of dots for drawing.
-        self.dot_list = []
+        self._cells_vertices = []
 
         arcade.set_background_color(arcade.color.BLACK)
 
@@ -48,7 +55,7 @@ class Game(arcade.Window):
         """ Map visual part setup."""
         face_width, face_height = self.FACE_SIZE
 
-        self.borders = arcade.ShapeElementList()
+        self._borders = arcade.ShapeElementList()
 
         x_list = [face_width/2 * i for i in range(11)]
         y_list_1 = itertools.cycle([0*face_height, 1*face_height])
@@ -59,33 +66,41 @@ class Game(arcade.Window):
         # Borders drawing.
         border_1 = arcade.create_line_strip(point_list_1, arcade.color.WHITE, 2)
         border_2 = arcade.create_line_strip(point_list_2, arcade.color.WHITE, 2)
-        self.borders.append(border_1)
-        self.borders.append(border_2)
+        self._borders.append(border_1)
+        self._borders.append(border_2)
 
         # Cells drawing.
-        cell_width = face_width / self.cells_on_edge
-        cell_height = face_height / self.cells_on_edge
+        cell_width, cell_height = self.cell_size_px
         for cell in self.world_map.cells:
-            triangle = self._get_triangle_vertices(cell, cell_width, cell_height)
-            self.dot_list.extend(triangle)
+            triangle_vertices = self._get_triangle_vertices(cell, cell_width, cell_height)
+            self._cells_vertices.extend(triangle_vertices)
 
-        self.update_colors()
+        self._update_cells_colors()
 
-    @staticmethod
-    def _get_triangle_vertices(cell, cell_width, cell_height):
+    def _initialize_default_cells_colors(self):
+        self._default_cells_colors = {}
+        color_random = random.Random(self.world_map.seed)
+        # random light-gray shade
+        for cell in self.world_map.cells:
+            random_color = color_random.randint(128, 256)
+            self._default_cells_colors[cell] = (random_color,) * 3
+
+    def _get_triangle_vertices(self, cell, cell_width, cell_height):
         """ Returns tuple of vertex coordinates. """
-        down_y = cell.y
-        up_y = cell.y + 1
-        if cell.up_side_down:
-            left_x = (cell.x - 1) // 2 + 0.5
+        cell_upside_down = self.world_map.is_upside_down(cell)
+        x, y = cell.pos
+        down_y = y
+        up_y = y + 1
+        if cell_upside_down:
+            left_x = (x - 1) // 2 + 0.5
         else:
-            left_x = cell.x // 2
-        if cell.y % 2 == 1:
+            left_x = x // 2
+        if y % 2 == 1:
             left_x -= 0.5
         middle_x = left_x + 0.5
         right_x = left_x + 1
         vertices_x = (left_x, right_x, middle_x)
-        if cell.up_side_down:
+        if cell_upside_down:
             vertices_y = (up_y, up_y, down_y)
         else:
             vertices_y = (down_y, down_y, up_y)
@@ -98,39 +113,49 @@ class Game(arcade.Window):
             triangle[vertex_index] = tuple(vertex)
         return tuple(triangle)
 
-    def update_colors(self):
-        """ Map visual part update. """
-        self.cells = arcade.ShapeElementList()
+    def _get_cell_color(self, cell):
+        if self.color_mode == "common":
+            return self._default_cells_colors[cell]
+        elif self.color_mode == "tectonic":
+            min_color = 100
+            max_color = 255
+            max_plate_index = self.world_map.tectonic_plates_count - 1
+            k = cell.plate.index / max_plate_index
+            color = min_color + k*(max_color-min_color)
+            return (int(color),) * 3
+        elif self.color_mode == "height":
+            # TODO
+            return self._default_cells_colors[cell]
+        else:
+            raise AssertionError("Color mode does not exist: %s" % self.color_mode)
 
+    def _update_cells_colors(self):
+        """ Map visual part update. """
         color_list = []
 
         # Colors recalculation.
         for cell in self.world_map.cells:
-            if self.mod == 'tectonic':
-                color = 3 * [cell.tectonic_color]
-            else:
-                color = 3 * [cell.color]
-            color_list.extend(color)
+            color = self._get_cell_color(cell)
+            color_list.extend(3 * [color])
 
-        cells_grid = arcade.create_triangles_filled_with_colors(self.dot_list, color_list)
-        self.cells.append(cells_grid)
+        self._cells_grid_container = arcade.ShapeElementList()
+        cells_grid = arcade.create_triangles_filled_with_colors(self._cells_vertices, color_list)
+        self._cells_grid_container.append(cells_grid)
 
-    def draw_player(self):
+    def _draw_player(self):
         """ Draw player. """
         # Draw circle
-        player = self.player
-        face_width, face_height = self.FACE_SIZE
-        cell_width = face_width / self.cells_on_edge
-        cell_height = face_height / self.cells_on_edge
-        arcade.draw_circle_filled(round(cell_width * (player.x / 2)),
-                                  round(cell_height * ((0.33 + 0.33 * (player.x % 2 == player.y % 2)) + player.y)),
+        x, y = self.player.cell.pos
+        cell_width, cell_height = self.cell_size_px
+        arcade.draw_circle_filled(round(cell_width * (x / 2)),
+                                  round(cell_height * ((0.33 + 0.33 * (x % 2 == y % 2)) + y)),
                                   3,
                                   arcade.color.BLACK)
         if self.display_player_coordinates:
             # Draw numbers
-            arcade.draw_text(str(player.x) + ' ' + str(player.y),
-                             round(cell_width * (player.x / 2)),
-                             round(cell_height * (0.33 * (player.x % 2 == player.y % 2) + player.y) + 30),
+            arcade.draw_text(str(x) + ' ' + str(y),
+                             round(cell_width * (x / 2)),
+                             round(cell_height * (0.33 * (x % 2 == y % 2) + y) + 30),
                              arcade.color.BLACK,
                              17,
                              bold=True,
@@ -146,14 +171,14 @@ class Game(arcade.Window):
         # Visual part render.
         arcade.start_render()
 
-        self.cells.draw()
-        self.borders.draw()
-        self.draw_player()
+        self._cells_grid_container.draw()
+        self._borders.draw()
+        self._draw_player()
 
-        if self.debug_mod:
+        if self.debug_mode:
             arcade.draw_text(VERSION, 230, screen_height - 40, arcade.color.WHITE, 18,
                              font_name=('Century Gothic', 'Arial'))
-            arcade.draw_text('Mod: ' + self.mod, 500, screen_height - 40, arcade.color.WHITE, 18,
+            arcade.draw_text('Mod: ' + self.color_mode, 500, screen_height - 40, arcade.color.WHITE, 18,
                              font_name=('Century Gothic', 'Arial'))
 
         if self.hints_notification:
@@ -161,7 +186,7 @@ class Game(arcade.Window):
                              font_name=('Century Gothic', 'Arial'))
 
         if self.hints_on:
-            self.draw_hints_window()
+            self._draw_hints_window()
 
     def on_key_press(self, symbol, modifiers: int):
         """ Input treatment. """
@@ -172,17 +197,17 @@ class Game(arcade.Window):
 
         # Debug Mod.
         if symbol == arcade.key.F3:
-            self.debug_mod = not self.debug_mod
+            self.debug_mode = not self.debug_mode
 
         # Common Mod.
         if symbol == arcade.key.KEY_1:
-            self.mod = 'common'
-            self.update_colors()
+            self.color_mode = 'common'
+            self._update_cells_colors()
 
         # Tectonic Mod.
-        if symbol == arcade.key.KEY_2:
-            self.mod = 'tectonic'
-            self.update_colors()
+        if symbol == arcade.key.KEY_2 and self.tectonic_plates_generated:
+            self.color_mode = 'tectonic'
+            self._update_cells_colors()
 
         # Hints.
         if symbol == arcade.key.H:
@@ -190,10 +215,11 @@ class Game(arcade.Window):
             self.hints_notification = False
 
         # Tectonic Generation.
-        if symbol == arcade.key.T:
+        if symbol == arcade.key.T and not self.tectonic_plates_generated:
             self.world_map.tectonic_generation()
-            if self.mod == 'tectonic':
-                self.update_colors()
+            self.tectonic_plates_generated = True
+            if self.color_mode == 'tectonic':
+                self._update_cells_colors()
 
         # Coordinates.
         if symbol == arcade.key.S:
@@ -201,12 +227,10 @@ class Game(arcade.Window):
 
         # Movement.
         keys = arcade.key
-        x = self.player.x
-        y = self.player.y
-        neighbors = self.world_map.get_positions_near(x, y)
-        # TODO: remove disclosure of Icosahedron secrets
-        horizontal_side_up = (x + y) % 2 == 0
-        if horizontal_side_up:
+        cell = self.player.cell
+        neighbors = self.world_map.get_cells_near(cell)
+        cell_upside_down = self.world_map.is_upside_down(cell)
+        if cell_upside_down:
             neighbors_by_keys = {
                 (keys.Z, keys.A): neighbors.left,
                 (keys.C, keys.D): neighbors.right,
@@ -221,9 +245,9 @@ class Game(arcade.Window):
         for key_set in neighbors_by_keys.keys():
             if symbol in key_set:
                 neighbor = neighbors_by_keys[key_set]
-                self.player.move_to(*neighbor)
+                self.player.move_to(neighbor)
 
-    def draw_hints_window(self):
+    def _draw_hints_window(self):
         """ Hints window drawing """
         screen_width = self.SCREEN_WIDTH
         screen_height = self.SCREEN_HEIGHT

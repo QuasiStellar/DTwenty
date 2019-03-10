@@ -1,6 +1,3 @@
-import random
-
-
 class TectonicPlate(object):
 
     def __init__(self, index, world_map):
@@ -8,12 +5,12 @@ class TectonicPlate(object):
         self.world_map = world_map
         self.cells = set()
         self.overgrowth_factor = 1
-        self.type = 'oceanic' if random.random() < self.world_map.submergence else 'continental'
+        is_oceanic = self.world_map.random.random() < self.world_map.submergence
+        self.type = 'oceanic' if is_oceanic else 'continental'
 
     def add_cell(self, cell):
         self.cells.add(cell)
-        cell.plate = self.index
-        cell.tectonic_color = (100 + 30 * self.index,) * 3
+        cell.plate = self
 
     @property
     def size(self):

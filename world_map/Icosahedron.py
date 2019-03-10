@@ -15,7 +15,7 @@ class Icosahedron:
         y_size = 3*self.cells_on_edge
         self.size = _Size(x_size, y_size)
         # map - 2-dim list of existing cells
-        self._map = [[self.__create_cell(x, y) for y in range(y_size)]
+        self._map = [[self.__create_cell((x, y)) for y in range(y_size)]
                      for x in range(x_size)]
         # cells - tuple of all cells.
         cells = itertools.chain(*self._map)  # join columns
@@ -26,10 +26,10 @@ class Icosahedron:
         x, y = pos
         return self._map[x][y]
 
-    def __create_cell(self, x, y):
+    def __create_cell(self, pos):
         """ Returns cell object for existing cells. """
-        if self._pos_exists((x, y)):
-            return self._cell_class(x, y, world_map=self)
+        if self._pos_exists(pos):
+            return self._cell_class(pos, world_map=self)
         else:
             return None
 
@@ -49,19 +49,29 @@ class Icosahedron:
         max_y = 2*face_height + relative_y_border - 1
         return min_y <= y <= max_y
 
-    def get_positions_near(self, x, y):
-        """ Returns tuple of possible directions. """
-        pos = (x, y)
+    def is_upside_down(self, cell):
+        if isinstance(cell, self._cell_class):
+            x, y = cell.x, cell.y
+        else:
+            # TODO: replace positions with cells everywhere
+            x, y = cell
+        return (x + y) % 2 == 0
+
+    def get_cells_near(self, cell):
+        """ Returns tuple of adjacent cells. """
+        pos = cell.pos
+        x, y = pos
         if not self._pos_exists(pos):
             raise IndexError
         width = self.size.x
         left = ((x-1) % width, y)
         right = ((x+1) % width, y)
-        horizontal_side_up = (x + y) % 2 == 0
-        if horizontal_side_up:
+        cell_upside_down = self.is_upside_down(pos)
+        if cell_upside_down:
             middle = (x, y+1)
         else:
             middle = (x, y-1)
+
         face_height = self.cells_on_edge
         yy = y % face_height
         if y < face_height:
@@ -74,10 +84,7 @@ class Icosahedron:
             left = ((x-border_distance) % width, y)
         if not self._pos_exists(right):
             right = ((x+border_distance) % width, y)
-        return _Directions(left=left, right=right, middle=middle)
 
-    def get_cells_near(self, cell):
-        """ Returns tuple of adjacent cells. """
-        positions_near = self.get_positions_near(cell.x, cell.y)
+        positions_near = _Directions(left=left, right=right, middle=middle)
         cells_near = map(lambda pos: self[pos], positions_near)
-        return tuple(cells_near)
+        return _Directions(*cells_near)

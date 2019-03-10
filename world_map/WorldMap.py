@@ -9,11 +9,10 @@ from world_map.TectonicPlate import TectonicPlate
 class WorldMap(Icosahedron):
 
     def __init__(self, n, tectonic_plates_count, submergence, seed):
-        # TODO: split logic and output
-        self.color_random = Random(seed)
         super().__init__(cells_on_edge=2**n, cell_class=Cell)
         self.tectonic_plates_count = tectonic_plates_count
         self.submergence = submergence
+        self.seed = seed
         self.random = Random(seed)
 
     def tectonic_generation(self):
@@ -37,7 +36,7 @@ class WorldMap(Icosahedron):
         # other cells distribution
         while len(already_in_plate) != len(self.cells):
             cell = border_cells.popleft()
-            plate_index = cell.plate
+            plate_index = cell.plate.index
             plate = plates[plate_index]
             cells_near = self.get_cells_near(cell)
             free_cells_near = filter(lambda c: c not in already_in_plate, cells_near)
