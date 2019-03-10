@@ -109,7 +109,7 @@ class Game(arcade.Window):
             min_color = 100
             max_color = 255
             max_plate_index = self.world_map.tectonic_plates_count - 1
-            k = cell.plate / max_plate_index
+            k = cell.plate.index / max_plate_index
             color = min_color + k*(max_color-min_color)
             return (int(color),) * 3
         else:

@@ -12,7 +12,7 @@ class Cell(object):
         self.type = 0
         self.temperature = 0
         self.height = 0
-        self.plate = 0
+        self.plate = None
 
         # TODO: split logic and output
         # random light-gray shade

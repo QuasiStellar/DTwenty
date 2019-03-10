@@ -37,7 +37,7 @@ class WorldMap(Icosahedron):
         # other cells distribution
         while len(already_in_plate) != len(self.cells):
             cell = border_cells.popleft()
-            plate_index = cell.plate
+            plate_index = cell.plate.index
             plate = plates[plate_index]
             cells_near = self.get_cells_near(cell)
             free_cells_near = filter(lambda c: c not in already_in_plate, cells_near)

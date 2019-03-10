@@ -10,7 +10,7 @@ class TectonicPlate(object):
 
     def add_cell(self, cell):
         self.cells.add(cell)
-        cell.plate = self.index
+        cell.plate = self
 
     @property
     def size(self):
