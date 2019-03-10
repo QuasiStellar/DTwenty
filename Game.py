@@ -21,7 +21,9 @@ class Game(arcade.Window):
 
         # WorldMap object - main map.
         self.world_map = WorldMap.WorldMap(n, tectonic_plates_count, submergence, seed)
-        self.cells_on_edge = self.world_map.cells_on_edge  # TODO: remove
+        cells_on_edge = self.world_map.cells_on_edge
+        face_width, face_height = self.FACE_SIZE
+        self.cell_size_px = (face_width/cells_on_edge, face_height/cells_on_edge)
 
         # Player object - a dot moving through the map.
         self.player = Player.Player(0, 0, self.world_map)
@@ -65,8 +67,7 @@ class Game(arcade.Window):
         self._borders.append(border_2)
 
         # Cells drawing.
-        cell_width = face_width / self.cells_on_edge
-        cell_height = face_height / self.cells_on_edge
+        cell_width, cell_height = self.cell_size_px
         for cell in self.world_map.cells:
             triangle_vertices = self._get_triangle_vertices(cell, cell_width, cell_height)
             self._cells_vertices.extend(triangle_vertices)
@@ -125,9 +126,7 @@ class Game(arcade.Window):
         """ Draw player. """
         # Draw circle
         player = self.player
-        face_width, face_height = self.FACE_SIZE
-        cell_width = face_width / self.cells_on_edge
-        cell_height = face_height / self.cells_on_edge
+        cell_width, cell_height = self.cell_size_px
         arcade.draw_circle_filled(round(cell_width * (player.x / 2)),
                                   round(cell_height * ((0.33 + 0.33 * (player.x % 2 == player.y % 2)) + player.y)),
                                   3,
