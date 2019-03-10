@@ -32,6 +32,8 @@ class Game(arcade.Window):
         # ShapeElementList object for cells drawing. See setup() & _update_cells_colors()
         self._cells_grid_container = None
 
+        self.tectonic_plates_generated = False
+
         self.hints_on = False
         self.hints_notification = True
         self.debug_mode = False
@@ -98,20 +100,24 @@ class Game(arcade.Window):
             triangle[vertex_index] = tuple(vertex)
         return tuple(triangle)
 
+    def _get_cell_color(self, cell):
+        if self.color_mode == "common":
+            return 3 * [cell.color]
+        elif self.color_mode == "tectonic":
+            return 3 * [cell.tectonic_color]
+        else:
+            raise AssertionError("Color mode does not exist: %s" % self.color_mode)
+
     def _update_cells_colors(self):
         """ Map visual part update. """
-        self._cells_grid_container = arcade.ShapeElementList()
-
         color_list = []
 
         # Colors recalculation.
         for cell in self.world_map.cells:
-            if self.color_mode == 'tectonic':
-                color = 3 * [cell.tectonic_color]
-            else:
-                color = 3 * [cell.color]
+            color = self._get_cell_color(cell)
             color_list.extend(color)
 
+        self._cells_grid_container = arcade.ShapeElementList()
         cells_grid = arcade.create_triangles_filled_with_colors(self._cells_vertices, color_list)
         self._cells_grid_container.append(cells_grid)
 
@@ -180,7 +186,7 @@ class Game(arcade.Window):
             self._update_cells_colors()
 
         # Tectonic Mod.
-        if symbol == arcade.key.KEY_2:
+        if symbol == arcade.key.KEY_2 and self.tectonic_plates_generated:
             self.color_mode = 'tectonic'
             self._update_cells_colors()
 
@@ -190,8 +196,9 @@ class Game(arcade.Window):
             self.hints_notification = False
 
         # Tectonic Generation.
-        if symbol == arcade.key.T:
+        if symbol == arcade.key.T and not self.tectonic_plates_generated:
             self.world_map.tectonic_generation()
+            self.tectonic_plates_generated = True
             if self.color_mode == 'tectonic':
                 self._update_cells_colors()
 
