@@ -9,8 +9,8 @@ class VertexMap(object):
         self._vertex_class = vertex_class
         x_size = 10 * self.cells_on_edge
         y_size = self.cells_on_edge + 1
-        self.vertex_list = [[self.__create_vertex(x, imag_y) for imag_y in range(y_size)]
-                            for x in range(x_size)]
+        self.__vertex_list = [[self.__create_vertex(x, imag_y) for imag_y in range(y_size)]
+                              for x in range(x_size)]
         self.random = Random(seed)
 
     def __create_vertex(self, x, imag_y):
@@ -21,17 +21,17 @@ class VertexMap(object):
     def __getitem__(self, pos):
         x, y = pos
         imag_y = self.__get_imaginary_y(x, y)
-        return self.vertex_list[x][imag_y]
+        return self.__vertex_list[x][imag_y]
 
     def __get_real_y(self, x, imaginary_y):
-        """ Returns real vertex height based on vertex_list height. """
+        """ Returns real vertex height based on __vertex_list height. """
         edge = self.cells_on_edge
         xx = x % (edge * 2)
         bottom_indent = min(xx, 2 * edge - xx)
         return bottom_indent + imaginary_y * 2
 
     def __get_imaginary_y(self, x, real_y):
-        """ Returns vertex_list height based on real vertex height. """
+        """ Returns __vertex_list height based on real vertex height. """
         edge = self.cells_on_edge
         xx = x % (edge * 2)
         bottom_indent = min(xx, 2 * edge - xx)

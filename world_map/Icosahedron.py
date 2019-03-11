@@ -18,7 +18,7 @@ class Icosahedron:
         self._map = [[self.__create_cell((x, y)) for y in range(y_size)]
                      for x in range(x_size)]
         # cells - tuple of all cells.
-        cells = itertools.chain(*self._map)  # join columns
+        cells = itertools.chain.from_iterable(self._map)  # join columns
         cells = filter(lambda c: c is not None, cells)
         self.cells = tuple(cells)
 

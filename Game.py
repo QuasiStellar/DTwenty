@@ -218,8 +218,7 @@ class Game(arcade.Window):
         if symbol == arcade.key.T and not self.tectonic_plates_generated:
             self.world_map.tectonic_generation()
             self.tectonic_plates_generated = True
-            if self.color_mode == 'tectonic':
-                self._update_cells_colors()
+            self._update_cells_colors()
 
         # Coordinates.
         if symbol == arcade.key.S:
