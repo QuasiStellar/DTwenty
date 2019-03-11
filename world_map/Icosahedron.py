@@ -50,23 +50,18 @@ class Icosahedron:
         return min_y <= y <= max_y
 
     def is_upside_down(self, cell):
-        if isinstance(cell, self._cell_class):
-            x, y = cell.pos
-        else:
-            # TODO: replace positions with cells everywhere
-            x, y = cell
+        if not isinstance(cell, self._cell_class):
+            raise TypeError("Icosahedron.is_upside_down arg must be cell")
+        x, y = cell.pos
         return (x + y) % 2 == 0
 
     def get_cells_near(self, cell):
         """ Returns tuple of adjacent cells. """
-        pos = cell.pos
-        x, y = pos
-        if not self._pos_exists(pos):
-            raise IndexError
+        x, y = cell.pos
         width = self.size.x
         left = ((x-1) % width, y)
         right = ((x+1) % width, y)
-        cell_upside_down = self.is_upside_down(pos)
+        cell_upside_down = self.is_upside_down(cell)
         if cell_upside_down:
             middle = (x, y+1)
         else:
