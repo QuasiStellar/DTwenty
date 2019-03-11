@@ -1,3 +1,5 @@
+from collections import namedtuple
+from itertools import starmap
 from random import Random
 
 
@@ -51,28 +53,41 @@ class VertexMap(object):
 
     def emerald(self, ver_a, ver_b, ver_c):
         """ Find all vertexes' height. """
-        ver_ab = self.__middle(ver_a, ver_b)
-        ver_bc = self.__middle(ver_b, ver_c)
-        ver_ac = self.__middle(ver_a, ver_c)
         distance = self.__distance(ver_a, ver_b)
         sigma = distance / self.cells_on_edge
-        ver_ab.height = (ver_a.height + ver_b.height) / 2 + self.random.gauss(0, sigma)
-        ver_bc.height = (ver_b.height + ver_c.height) / 2 + self.random.gauss(0, sigma)
-        ver_ac.height = (ver_a.height + ver_c.height) / 2 + self.random.gauss(0, sigma)
+        for ver_1, ver_2 in ((ver_a, ver_b), (ver_b, ver_c), (ver_a, ver_c)):
+            ver_mid = self.__middle(ver_1, ver_2)
+            ver_mid.height = (ver_1.height + ver_2.height) / 2 + self.random.gauss(0, sigma)
         if distance != 2:
+            ver_ab = self.__middle(ver_a, ver_b)
+            ver_bc = self.__middle(ver_b, ver_c)
+            ver_ac = self.__middle(ver_a, ver_c)
             self.emerald(ver_a, ver_ab, ver_ac)
             self.emerald(ver_b, ver_ab, ver_bc)
             self.emerald(ver_c, ver_bc, ver_ac)
             self.emerald(ver_ab, ver_bc, ver_ac)
 
     def vertexes_by_cell(self, cell):
-        world_map = cell.world_map
-        if world_map.is_upside_down(cell):
-            vertical_vertex = self.vertex_list[cell.x][self.__imaginary_y(cell.x, cell.y)]
-            left_vertex = self.vertex_list[cell.x - 1][self.__imaginary_y(cell.x - 1, cell.y + 1)]
-            right_vertex = self.vertex_list[cell.x + 1][self.__imaginary_y(cell.x + 1, cell.y + 1)]
+        _List = namedtuple("List", "vertical left right")
+        x_list = _List(
+            left=cell.x - 1,
+            vertical=cell.x,
+            right=cell.x + 1
+        )
+        if cell.world_map.is_upside_down(cell):
+            y_list = _List(
+                vertical=cell.y,
+                left=cell.y + 1,
+                right=cell.y + 1
+            )
         else:
-            vertical_vertex = self.vertex_list[cell.x][self.__imaginary_y(cell.x, cell.y + 1)]
-            left_vertex = self.vertex_list[cell.x - 1][self.__imaginary_y(cell.x - 1, cell.y - 1)]
-            right_vertex = self.vertex_list[cell.x + 1][self.__imaginary_y(cell.x + 1, cell.y - 1)]
-        return vertical_vertex, left_vertex, right_vertex
+            y_list = _List(
+                vertical=cell.y + 1,
+                left=cell.y - 1,
+                right=cell.y - 1
+            )
+        positions_list = zip(x_list, y_list)
+        y_list = starmap(self.__imaginary_y, positions_list)
+        positions_list = zip(x_list, y_list)
+        vertex_list = starmap(lambda x, y: self.vertex_list[x][y], positions_list)
+        return tuple(vertex_list)
