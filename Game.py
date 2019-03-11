@@ -47,7 +47,7 @@ class Game(arcade.Window):
         self.color_mode = 'common'
 
         # List of dots for drawing.
-        self._cells_vertices = []
+        self._cells_vertices = None
 
         arcade.set_background_color(arcade.color.BLACK)
 
@@ -69,11 +69,9 @@ class Game(arcade.Window):
         self._borders.append(border_1)
         self._borders.append(border_2)
 
-        # Cells drawing.
-        cell_width, cell_height = self.cell_size_px
-        for cell in self.world_map.cells:
-            triangle_vertices = self._get_triangle_vertices(cell, cell_width, cell_height)
-            self._cells_vertices.extend(triangle_vertices)
+        triangles = map(self._get_triangle_vertices, self.world_map.cells)
+        triangles_vertices = itertools.chain.from_iterable(triangles)
+        self._cells_vertices = list(triangles_vertices)
 
         self._update_cells_colors()
 
@@ -85,7 +83,7 @@ class Game(arcade.Window):
             random_color = color_random.randint(128, 256)
             self._default_cells_colors[cell] = (random_color,) * 3
 
-    def _get_triangle_vertices(self, cell, cell_width, cell_height):
+    def _get_triangle_vertices(self, cell):
         """ Returns tuple of vertex coordinates. """
         cell_upside_down = self.world_map.is_upside_down(cell)
         x, y = cell.pos
@@ -106,6 +104,8 @@ class Game(arcade.Window):
             vertices_y = (down_y, down_y, up_y)
         triangle = zip(vertices_x, vertices_y)
         triangle = list(triangle)
+
+        cell_width, cell_height = self.cell_size_px
         for vertex_index, vertex in enumerate(tuple(triangle)):
             x, y = vertex
             vertex = (x * cell_width, y * cell_height)
