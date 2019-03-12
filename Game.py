@@ -85,19 +85,14 @@ class Game(arcade.Window):
 
     def _get_triangle_vertices(self, cell):
         """ Returns tuple of vertex coordinates. """
-        cell_upside_down = self.world_map.is_upside_down(cell)
         x, y = cell.pos
+        middle_x = x / 2
+        left_x = middle_x - 0.5
+        right_x = middle_x + 0.5
+        vertices_x = (left_x, right_x, middle_x)
         down_y = y
         up_y = y + 1
-        if cell_upside_down:
-            left_x = (x - 1) // 2 + 0.5
-        else:
-            left_x = x // 2
-        if y % 2 == 1:
-            left_x -= 0.5
-        middle_x = left_x + 0.5
-        right_x = left_x + 1
-        vertices_x = (left_x, right_x, middle_x)
+        cell_upside_down = self.world_map.is_upside_down(cell)
         if cell_upside_down:
             vertices_y = (up_y, up_y, down_y)
         else:
