@@ -14,16 +14,17 @@ class Game(arcade.Window):
 
     def __init__(self, n, tectonic_plates_count, submergence, seed):
         # Size of the default window.
-        self.SCREEN_WIDTH = 1500
-        self.SCREEN_HEIGHT = 780
-        self.FACE_SIZE = (300, 260)
+        self.screen_size_px = (1500, 780)
 
-        super().__init__(self.SCREEN_WIDTH, self.SCREEN_HEIGHT, SCREEN_TITLE, fullscreen=False)
+        self.face_size_px = (300, 260)
+
+        screen_width, screen_height = self.screen_size_px
+        super().__init__(screen_width, screen_height, SCREEN_TITLE, fullscreen=False)
 
         # WorldMap object - main map.
         self.world_map = WorldMap.WorldMap(n, tectonic_plates_count, submergence, seed)
         cells_on_edge = self.world_map.cells_on_edge
-        face_width, face_height = self.FACE_SIZE
+        face_width, face_height = self.face_size_px
         self.cell_size_px = (face_width/cells_on_edge, face_height/cells_on_edge)
 
         self._initialize_default_cells_colors()
@@ -53,7 +54,7 @@ class Game(arcade.Window):
 
     def setup(self):
         """ Map visual part setup."""
-        face_width, face_height = self.FACE_SIZE
+        face_width, face_height = self.face_size_px
 
         self._borders = arcade.ShapeElementList()
 
@@ -139,20 +140,25 @@ class Game(arcade.Window):
 
     def _draw_player(self):
         """ Draw player. """
-        # Draw circle
-        x, y = self.player.cell.pos
         cell_width, cell_height = self.cell_size_px
-        arcade.draw_circle_filled(round(cell_width * (x / 2)),
-                                  round(cell_height * ((0.33 + 0.33 * (x % 2 == y % 2)) + y)),
-                                  3,
-                                  arcade.color.BLACK)
+        cell = self.player.cell
+        x = (cell.pos.x / 2) * cell_width
+        y = cell.pos.y * cell_height
+        cell_upside_down = self.world_map.is_upside_down(cell)
+        if cell_upside_down:
+            y += 0.33*cell_height
+        # Draw circle
+        arcade.draw_circle_filled(round(x),
+                                  round(y + 0.33*cell_height),
+                                  radius=3,
+                                  color=arcade.color.BLACK)
         if self.display_player_coordinates:
             # Draw numbers
-            arcade.draw_text(str(x) + ' ' + str(y),
-                             round(cell_width * (x / 2)),
-                             round(cell_height * (0.33 * (x % 2 == y % 2) + y) + 30),
-                             arcade.color.BLACK,
-                             17,
+            arcade.draw_text("%s %s" % cell.pos,
+                             round(x),
+                             round(y + 30),
+                             color=arcade.color.BLACK,
+                             font_size=17,
                              bold=True,
                              align="center",
                              font_name=('Century Gothic', 'Arial'),
@@ -160,8 +166,7 @@ class Game(arcade.Window):
                              anchor_y="center")
 
     def on_draw(self):
-        screen_width = self.SCREEN_WIDTH
-        screen_height = self.SCREEN_HEIGHT
+        screen_width, screen_height = self.screen_size_px
 
         # Visual part render.
         arcade.start_render()
@@ -185,41 +190,42 @@ class Game(arcade.Window):
 
     def on_key_press(self, symbol, modifiers: int):
         """ Input treatment. """
-        # Full Screen.
+        # Full Screen
         if symbol == arcade.key.F:
             self.set_fullscreen(not self.fullscreen)
-            self.set_viewport(0, self.SCREEN_WIDTH, 0, self.SCREEN_HEIGHT)
+            screen_width, screen_height = self.screen_size_px
+            self.set_viewport(0, screen_width, 0, screen_height)
 
-        # Debug Mod.
+        # Debug Mode
         if symbol == arcade.key.F3:
             self.debug_mode = not self.debug_mode
 
-        # Common Mod.
+        # Common Mode
         if symbol == arcade.key.KEY_1:
             self.color_mode = 'common'
             self._update_cells_colors()
 
-        # Tectonic Mod.
+        # Tectonic Mode
         if symbol == arcade.key.KEY_2 and self.tectonic_plates_generated:
             self.color_mode = 'tectonic'
             self._update_cells_colors()
 
-        # Hints.
+        # Hints
         if symbol == arcade.key.H:
             self.hints_on = not self.hints_on
             self.hints_notification = False
 
-        # Tectonic Generation.
+        # Tectonic Generation
         if symbol == arcade.key.T and not self.tectonic_plates_generated:
             self.world_map.tectonic_generation()
             self.tectonic_plates_generated = True
             self._update_cells_colors()
 
-        # Coordinates.
+        # Display Player Coordinates ON/OFF
         if symbol == arcade.key.S:
             self.display_player_coordinates = not self.display_player_coordinates
 
-        # Movement.
+        # Movement
         keys = arcade.key
         cell = self.player.cell
         neighbors = self.world_map.get_cells_near(cell)
@@ -243,41 +249,66 @@ class Game(arcade.Window):
 
     def _draw_hints_window(self):
         """ Hints window drawing """
-        screen_width = self.SCREEN_WIDTH
-        screen_height = self.SCREEN_HEIGHT
-        arcade.draw_rectangle_filled(screen_width / 2, screen_height / 2, screen_width - 200,
-                                     screen_height - 200,
+        screen_width, screen_height = self.screen_size_px
+
+        arcade.draw_rectangle_filled(screen_width / 2, screen_height / 2,
+                                     screen_width - 200, screen_height - 200,
                                      arcade.color.BLACK)
-        arcade.draw_rectangle_filled(screen_width / 2, screen_height / 2, screen_width - 204,
-                                     screen_height - 204,
+        arcade.draw_rectangle_filled(screen_width / 2, screen_height / 2,
+                                     screen_width - 204, screen_height - 204,
                                      arcade.color.WHITE)
-        arcade.draw_rectangle_filled(screen_width / 2, screen_height / 2, screen_width - 208,
-                                     screen_height - 208,
+        arcade.draw_rectangle_filled(screen_width / 2, screen_height / 2,
+                                     screen_width - 208, screen_height - 208,
                                      arcade.color.BLACK)
-        arcade.draw_text("Hints", screen_width / 2, screen_height / 2 + 260,
-                         arcade.color.WHITE, 40, width=200, bold=True,
-                         align="center", font_name=('Century Gothic', 'Arial'), anchor_x="center", anchor_y="center")
-        arcade.draw_text("Controls:", screen_width / 2 - 500, screen_height / 2 + 200,
-                         arcade.color.WHITE, 30, width=200, bold=True,
-                         align="center", font_name=('Century Gothic', 'Arial'), anchor_x="center", anchor_y="center")
-        arcade.draw_text("Motion:", screen_width / 2 - 480, screen_height / 2 + 100,
-                         arcade.color.WHITE, 20, width=200, bold=True,
-                         align="center", font_name=('Century Gothic', 'Arial'), anchor_x="center", anchor_y="center")
-        arcade.draw_text("Q W E\nA     D\nZ  X C", screen_width / 2 - 380, screen_height / 2 + 100,
-                         arcade.color.WHITE, 20, width=200, bold=True,
-                         align="center", font_name=('Century Gothic', 'Arial'), anchor_x="center", anchor_y="center")
-        arcade.draw_text("Coordinates: S", screen_width / 2 - 200, screen_height / 2 + 100,
-                         arcade.color.WHITE, 20, width=200, bold=True,
-                         align="center", font_name=('Century Gothic', 'Arial'), anchor_x="center", anchor_y="center")
-        arcade.draw_text("Full Screen: F", screen_width / 2 - 450, screen_height / 2,
-                         arcade.color.WHITE, 20, width=200, bold=True,
-                         align="center", font_name=('Century Gothic', 'Arial'), anchor_x="center", anchor_y="center")
-        arcade.draw_text("Hints: H", screen_width / 2 - 250, screen_height / 2,
-                         arcade.color.WHITE, 20, width=200, bold=True,
-                         align="center", font_name=('Century Gothic', 'Arial'), anchor_x="center", anchor_y="center")
-        arcade.draw_text("Debug Mod: F3", screen_width / 2 - 440, screen_height / 2 - 100,
-                         arcade.color.WHITE, 20, width=200, bold=True,
-                         align="center", font_name=('Century Gothic', 'Arial'), anchor_x="center", anchor_y="center")
-        arcade.draw_text("Tectonic test: T", screen_width / 2 - 440, screen_height / 2 - 200,
-                         arcade.color.WHITE, 20, width=200, bold=True,
-                         align="center", font_name=('Century Gothic', 'Arial'), anchor_x="center", anchor_y="center")
+
+        def draw_text(*args, **kwargs):
+            default_kwargs = dict(
+                color=arcade.color.WHITE,
+                width=200,
+                bold=True,
+                align="center",
+                font_name=('Century Gothic', 'Arial'),
+                anchor_x="center",
+                anchor_y="center"
+            )
+            for key, value in default_kwargs.items():
+                if key not in kwargs:
+                    kwargs[key] = value
+            arcade.draw_text(*args, **kwargs)
+
+        draw_text("Hints",
+                  screen_width / 2,
+                  screen_height / 2 + 260,
+                  font_size=40)
+        draw_text("Controls:",
+                  screen_width / 2 - 500,
+                  screen_height / 2 + 200,
+                  font_size=30)
+        draw_text("Motion:",
+                  screen_width / 2 - 480,
+                  screen_height / 2 + 100,
+                  font_size=20)
+        draw_text("Q W E\nA     D\nZ  X C",
+                  screen_width / 2 - 380,
+                  screen_height / 2 + 100,
+                  font_size=20)
+        draw_text("Coordinates: S",
+                  screen_width / 2 - 200,
+                  screen_height / 2 + 100,
+                  font_size=20)
+        draw_text("Full Screen: F",
+                  screen_width / 2 - 450,
+                  screen_height / 2,
+                  font_size=20)
+        draw_text("Hints: H",
+                  screen_width / 2 - 250,
+                  screen_height / 2,
+                  font_size=20)
+        draw_text("Debug Mod: F3",
+                  screen_width / 2 - 440,
+                  screen_height / 2 - 100,
+                  font_size=20)
+        draw_text("Tectonic test: T",
+                  screen_width / 2 - 440,
+                  screen_height / 2 - 200,
+                  font_size=20)
