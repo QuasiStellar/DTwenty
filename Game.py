@@ -2,8 +2,8 @@ import arcade
 
 from WorldMapWidget import WorldMapWidget
 
-import Player
-import world_map.WorldMap as WorldMap
+from Player import Player
+from world_map.WorldMap import WorldMap
 
 VERSION = "alpha-0.3"
 SCREEN_TITLE = "D20"
@@ -19,14 +19,14 @@ class Game(arcade.Window):
         super().__init__(screen_width, screen_height, SCREEN_TITLE, fullscreen=False)
 
         # WorldMap object - main map
-        self.world_map = WorldMap.WorldMap(n, tectonic_plates_count, submergence, seed)
+        self.world_map = WorldMap(n, tectonic_plates_count, submergence, seed)
         self._world_map_widget = WorldMapWidget(
             world_map=self.world_map,
             size_px=self.screen_size_px
         )
 
         # Player object - a dot moving through the map
-        self.player = Player.Player(cell=self.world_map[0, 0], world_map=self.world_map)
+        self.player = Player(cell=self.world_map[0, 0], world_map=self.world_map)
 
         self.hints_on = False
         self.hints_notification = True
