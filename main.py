@@ -21,7 +21,6 @@ N = 6
 
 def main():
     game = Game.Game(n=N, tectonic_plates_count=TECTONIC_PLATES, submergence=SUBMERGENCE, seed=SEED)
-    game.setup()
     arcade.run()
 
 
