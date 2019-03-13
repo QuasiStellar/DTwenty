@@ -15,7 +15,14 @@ class WorldMap(Icosahedron):
         self.seed = seed
         self.random = Random(seed)
 
+    @property
+    def tectonic_plates_generated(self):
+        cell = self.cells[0]
+        return cell.plate is not None
+
     def tectonic_generation(self):
+        if self.tectonic_plates_generated:
+            raise AssertionError("tectonic plates already generated")
         plate_centers = self.random.sample(self.cells, self.tectonic_plates_count)
 
         # plates - list of TectonicPlates
