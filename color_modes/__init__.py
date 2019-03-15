@@ -1,0 +1,3 @@
+from color_modes.CommonColorMode import CommonColorMode
+from color_modes.HeightColorMode import HeightColorMode
+from color_modes.TectonicColorMode import TectonicColorMode
