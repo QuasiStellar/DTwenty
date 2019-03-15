@@ -1,7 +1,8 @@
 import itertools
-import random
 
 import arcade
+
+from color_modes import CommonColorMode, HeightColorMode, TectonicColorMode
 
 
 class WorldMapWidget:
@@ -17,9 +18,6 @@ class WorldMapWidget:
         face_width, face_height = self.face_size_px
         cells_on_edge = self.world_map.cells_on_edge
         self.cell_size_px = (face_width//cells_on_edge, face_height//cells_on_edge)
-
-        self._initialize_default_cells_colors()
-        self._color_mode = 'common'
 
         # ShapeElementList object for borders drawing
         self._borders = arcade.ShapeElementList()
@@ -43,32 +41,45 @@ class WorldMapWidget:
 
         # ShapeElementList object for cells drawing. See _update_cells_colors()
         self._cells_grid_container = None
-        self._update_cells_colors()
+
+        self._color_modes = {
+            "common": CommonColorMode(world_map=world_map),
+            "height": HeightColorMode(world_map=world_map),
+            "tectonic": TectonicColorMode(world_map=world_map)
+        }
+
+        self._color_mode = None
+        self.set_color_mode("common")
 
     def on_draw(self):
         self._cells_grid_container.draw()
         self._borders.draw()
 
-    def set_color_mode(self, color_mode):
-        if color_mode not in ("common", "tectonic", "height"):
-            raise ValueError("is not color mode: %s" % color_mode)
-        if color_mode == "tectonic":
-            if not self.world_map.tectonic_plates_generated:
-                raise AssertionError("tectonic plates are not generated yet")
+    @property
+    def color_mode_name(self):
+        for name, color_mode in self._color_modes.items():
+            if color_mode is self._color_mode:
+                return name
+
+    def set_color_mode(self, color_mode_name):
+        color_mode = self._color_modes[color_mode_name]
+        if not color_mode.can_be_enabled():
+            raise AssertionError("that color mode can't be enabled now: %s" % color_mode_name)
         self._color_mode = color_mode
         self._update_cells_colors()
 
-    @property
-    def color_mode(self):
-        return self._color_mode
+    def _update_cells_colors(self):
+        """ Map visual part update. """
+        color_list = []
 
-    def _initialize_default_cells_colors(self):
-        self._default_cells_colors = {}
-        color_random = random.Random(self.world_map.seed)
-        # random light-gray shade
+        # Colors recalculation.
         for cell in self.world_map.cells:
-            random_color = color_random.randint(128, 256)
-            self._default_cells_colors[cell] = (random_color,) * 3
+            color = self._color_mode.get_cell_color(cell)
+            color_list.extend(3 * [color])
+
+        self._cells_grid_container = arcade.ShapeElementList()
+        cells_grid = arcade.create_triangles_filled_with_colors(self._cells_vertices, color_list)
+        self._cells_grid_container.append(cells_grid)
 
     def _get_triangle_vertices(self, cell):
         """ Returns tuple of vertex coordinates. """
@@ -94,32 +105,3 @@ class WorldMapWidget:
             vertex = map(round, vertex)
             triangle[vertex_index] = tuple(vertex)
         return tuple(triangle)
-
-    def _update_cells_colors(self):
-        """ Map visual part update. """
-        color_list = []
-
-        # Colors recalculation.
-        for cell in self.world_map.cells:
-            color = self._get_cell_color(cell)
-            color_list.extend(3 * [color])
-
-        self._cells_grid_container = arcade.ShapeElementList()
-        cells_grid = arcade.create_triangles_filled_with_colors(self._cells_vertices, color_list)
-        self._cells_grid_container.append(cells_grid)
-
-    def _get_cell_color(self, cell):
-        if self.color_mode == "common":
-            return self._default_cells_colors[cell]
-        elif self.color_mode == "tectonic":
-            min_color = 100
-            max_color = 255
-            max_plate_index = self.world_map.tectonic_plates_count - 1
-            k = cell.plate.index / max_plate_index
-            color = min_color + k*(max_color-min_color)
-            return (int(color),) * 3
-        elif self.color_mode == "height":
-            # TODO
-            return self._default_cells_colors[cell]
-        else:
-            raise AssertionError("Color mode does not exist: %s" % self.color_mode)

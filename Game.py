@@ -77,7 +77,7 @@ class Game(arcade.Window):
                              color=arcade.color.WHITE,
                              font_size=18,
                              font_name=('Century Gothic', 'Arial'))
-            arcade.draw_text('Mode: ' + self._world_map_widget.color_mode,
+            arcade.draw_text('Mode: ' + self._world_map_widget.color_mode_name,
                              500, screen_height - 40,
                              color=arcade.color.WHITE,
                              font_size=18,
