@@ -13,11 +13,11 @@ class WorldMapWidget:
         self.size_px = size_px
 
         width, height = size_px
-        self.face_size_px = (width//5, height//3)
+        self.face_size_px = (width/5, height/3)
 
         face_width, face_height = self.face_size_px
         cells_on_edge = self.world_map.cells_on_edge
-        self.cell_size_px = (face_width//cells_on_edge, face_height//cells_on_edge)
+        self.cell_size_px = (face_width/cells_on_edge, face_height/cells_on_edge)
 
         # ShapeElementList object for borders drawing
         self._borders = arcade.ShapeElementList()

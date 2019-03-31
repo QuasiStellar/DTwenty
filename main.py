@@ -13,7 +13,7 @@ TECTONIC_PLATES = 7
 SUBMERGENCE = 0.5
 # Which part of tectonic plates should be oceanic.
 
-N = 6
+N = 5
 # N determines an amount of cells on your map (2**N cells on one side).
 # Remember that quantity is proportional to the square of edge length.
 # Huge values can cause lags and Memory Error (N>6)
